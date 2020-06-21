@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  WerewolfFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: WerewolfEndpoints
+      Handler: lambda.handler
+      Runtime: ruby2.7
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: WerewolfGamesTable
+      CodeUri: s3://werewolf-api/49cf2c15ef551b1bb4df206042680837
+      MemorySize: 512
+      Timeout: 30
+      Events:
+        WerewolfAPI:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId:
+              Ref: WerewolfAPI
+  WerewolfAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: WerewolfAPI
+      StageName: Prod
+      DefinitionBody:
+        swagger: '2.0'
+        basePath: /Prod
+        info:
+          title:
+            Ref: AWS::StackName
+        paths:
+          /{proxy+}:
+            x-amazon-apigateway-any-method:
+              responses: {}
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WerewolfFunction.Arn}/invocations
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                type: aws_proxy
+          /:
+            get:
+              responses: {}
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WerewolfFunction.Arn}/invocations
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                type: aws_proxy
+  ConfigLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - WerewolfFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: WerewolfFunction
+      Principal: apigateway.amazonaws.com
+  WerewolfGamesTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: WerewolfGames
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+Outputs:
+  WerewolfAppUrl:
+    Description: App endpoint URL
+    Value:
+      Fn::Sub: https://${WerewolfAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod/

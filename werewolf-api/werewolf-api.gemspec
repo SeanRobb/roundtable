@@ -5,13 +5,13 @@ require "werewolf/api/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "werewolf-api"
-  spec.version       = Werewolf::Api::VERSION
+  spec.version       = Werewolf::VERSION
   spec.authors       = ["SeanRobb"]
-  spec.email         = ["sean.robb@centurylink.com"]
+  spec.email         = ["seanpatrickrobb@gmail.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because RubyGems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = "This is a game of werewolf that is able to be played through a webpage."
+  spec.description   = "Through this game you can have a dashboard view that shows the current state of the world. Also their is the ability to have people get their role card and voting card on thier phone."
+  spec.homepage      = "https://github.com/SeanRobb/werewolf"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -20,8 +20,8 @@ Gem::Specification.new do |spec|
     spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
     spec.metadata["homepage_uri"] = spec.homepage
-    spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
-    spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+    spec.metadata["source_code_uri"] = "https://github.com/SeanRobb/werewolf"
+    spec.metadata["changelog_uri"] = "https://github.com/SeanRobb/werewolf"
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."
