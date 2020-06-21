@@ -605,5 +605,4 @@ RSpec.describe Werewolf do
       end
     end
   end
-
 end
