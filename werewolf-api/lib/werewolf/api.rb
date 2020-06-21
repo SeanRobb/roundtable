@@ -1,19 +1,22 @@
 require_relative "./api/version"
+require 'aws-record'
 
 module Werewolf
   class Gameroom
     attr_accessor :id, :created, :roster, :location, :hasStarted, :hasFinished, :villigeWins
-
     def initialize(params = {})
       @id = params.fetch(:id, (0...4).map { (65 + rand(26)).chr }.join)
       @created = params.fetch(:created, Time.now.getutc)
-      @roster = params.fetch(:roster, [])
+      @roster = params.fetch(:roster, []).map { |player| 
+        player = Player.from_json(player) unless player.is_a? (Player)
+        player
+      }
       @location = params.fetch(:location, Location.new())
+      @location = Location.from_json(@location) unless @location.is_a? (Location)
       @hasStarted = params.fetch(:hasStarted, false)
       @hasFinished = params.fetch(:hasFinished, false)
       @villigeWins = params.fetch(:hasFinished, false)
     end
-
     def addPlayer(player)
       raise 'Player already exists' if roster.include? player
       raise 'Game has already started' if hasStarted
@@ -21,7 +24,6 @@ module Werewolf
 
       roster.push(player)
     end
-
     def start()
       raise 'Game has already started' if hasStarted
       raise 'Not enough players' if roster.length < 7
@@ -45,7 +47,6 @@ module Werewolf
 
       @hasStarted = true
     end
-
     def sendToDay(callerName)
       raise "Only narrator can change day" unless callerName == narrator.name
       return nil if @location.isNight == false
@@ -61,7 +62,9 @@ module Werewolf
       playerToDeactivate = tally.find {|player, value| value >= activeWerewolves.length}
       # No Player has enough votes to be deactivated
       return nil if playerToDeactivate.nil?
-      player = playerToDeactivate.first
+
+      player= roster.find { |player| player.name == playerToDeactivate.first}
+      # player = playerToDeactivate.first
 
       player.isActive = false
 
@@ -70,7 +73,6 @@ module Werewolf
 
       player
     end
-
     def sendToNight(callerName)
       raise "Only narrator can change day" unless callerName == narrator.name
       return nil if @location.isNight == true
@@ -85,7 +87,10 @@ module Werewolf
       playerToDeactivate = tally.find {|player, value| value > majorityNeeded}
       # No Player has enough votes to be deactivated
       return nil if playerToDeactivate.nil?
-      player = playerToDeactivate.first
+
+      player= roster.find { |player| player.name == playerToDeactivate.first}
+
+      # player = playerToDeactivate.first
 
       player.isActive = false
 
@@ -96,45 +101,36 @@ module Werewolf
 
       player
     end
-
     def submitVote(params={})
       player = activePlayers.find {|activePlayer| activePlayer.name == params.fetch(:player)}
       raise "Only active players can vote" if player.nil?
       voteFor = activePlayers.find {|activePlayer| activePlayer.name == params.fetch(:voteFor)}
       raise "Only active players can be voted for" if voteFor.nil?
-      player.vote = voteFor
+      player.vote = voteFor.name
     end
-    
     def narrator()
       return roster.find { |player|
         player.isNarrator
       }
     end
-
     def activeWerewolves() 
       return roster.select { |player|
         player.isWerewolf and player.isActive
       }
     end
-
     def activeVillagers()
       return roster.select { |player|
         !player.isWerewolf and player.isActive
       }
     end
-
     def activePlayers()
       return roster.select { |player|
         player.isActive
       }
     end
-
     def to_s
-      print "making string"
       "#{id} #{roster}"
     end
-
-
     def as_json(options={})
       {
         id: @id,
@@ -146,23 +142,27 @@ module Werewolf
         villigeWins: @villigeWins
       }
     end
-
     def to_json(*options)
       as_json(*options).to_json(*options)
     end
-
-    # def to_json
-    #   { :id => id, :created => created, :roster => roster, :location => location, :hasStarted => hasStarted, :hasFinished => hasFinished, :villigeWins => villigeWins}.to_json
-    # end
-
     def exist?
       return !id.empty?
     end
-
+    def to_model
+      game = WerewolfGames.new()
+      game.id=@id
+      game.created=@created
+      game.roster=@roster
+      game.location=@location
+      game.hasStarted=@hasStarted
+      game.hasFinished=@hasFinished
+      game.villigeWins=@villigeWins
+      game
+    end
     class Location
       attr_accessor :day, :isNight
       def initialize(params={})
-        @day = params.fetch(:day, 0)
+        @day = params.fetch(:day, params.fetch('day',0))
         @isNight = params.fetch(:isNight, true)
       end
       def exist?
@@ -172,19 +172,22 @@ module Werewolf
         self.day == other.day
         self.isNight == other.isNight
       end
+      def self.from_json(parsedJSON)
+        Location.new(day: parsedJSON.fetch("day", 0), isNight:parsedJSON.fetch("isNight", true))
+      end
       def as_json(options={})
         {
           day: @day,
           isNight: @isNight,
         }
       end
-
       def to_json(*options)
         as_json(*options).to_json(*options)
       end
-
+      def to_h(*options)
+        {:day=>@day,:isNight=>@isNight}
+      end
     end
-
     class Player
       attr_accessor :name, :isNarrator, :isWerewolf, :isActive, :vote
       def initialize(params = {}) 
@@ -198,25 +201,68 @@ module Werewolf
       def exist?
         !name.empty?
       end
+      def self.from_json(parsedJSON)
+        Player.new(name: parsedJSON.fetch("name"), 
+        isNarrator:parsedJSON.fetch("isNarrator", false), isWerewolf: parsedJSON.fetch("isWerewolf",false),
+        isActive: parsedJSON.fetch("isActive",false),vote: parsedJSON.fetch("vote",nil))
+      end
       def to_s
         "#{name}"
       end
       def as_json(options={})
+        hashedVote = '' if @vote.nil?
+        hashedVote = @vote unless @vote.nil?
         {
           name: @name,
           isNarrator: @isNarrator,
           isWerewolf: @isWerewolf,
           isActive: @isActive,
-          vote: @vote.name,
+          vote: hashedVote,
         }
       end
-
       def to_json(*options)
         as_json(*options).to_json(*options)
+      end
+      def to_h(*options)
+        hashedVote = '' if @vote.nil?
+        hashedVote = @vote unless @vote.nil?
+        {
+          :name => @name,
+          :isNarrator => @isNarrator,
+          :isWerewolf => @isWerewolf,
+          :isActive => @isActive,
+          :vote => hashedVote,
+        }
       end
       def ==(other)
         self.name.downcase == other.name.downcase
       end
+    end
+  end
+  # Class for DynamoDB table
+  # This could also be another file you depend on locally.
+  class WerewolfGames
+    include Aws::Record
+    set_table_name "WerewolfGames"
+    string_attr :id, hash_key: true
+    datetime_attr :created
+    list_attr  :roster
+    map_attr :location
+    boolean_attr :hasStarted
+    boolean_attr :hasFinished
+    boolean_attr :villigeWins
+  end
+
+
+  module WerewolfGameDBService
+    def self.get(gameroomId)
+      game = Werewolf::WerewolfGames.find(id:gameroomId)
+      raise "Game not found" if game.nil?
+      gameroom=Werewolf::Gameroom.new(game.to_h) unless game.nil?
+      gameroom
+    end
+    def self.save(gameroom)
+      gameroom.to_model.save(force:true)
     end
   end
 end

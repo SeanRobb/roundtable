@@ -12,7 +12,7 @@ RSpec.describe Werewolf do
       }
       expect(werewolfGame.created.to_s).to eq(Time.now.getutc.to_s) 
       expect(werewolfGame.roster).to be_empty
-      expect(werewolfGame.location).to exist
+      expect(werewolfGame.location).to_not be_nil
       expect(werewolfGame.hasStarted).to be_falsey
       expect(werewolfGame.hasFinished).to be_falsey
     end
@@ -606,4 +606,12 @@ RSpec.describe Werewolf do
     end
   end
 
+  # it "interacts with DB correctly" do
+  #   gameroom = createValidGame()
+  #   gameroom.start
+  #   simulateDay(gameroom)
+  #   Werewolf::WerewolfGameDBService.save gameroom
+  #   room = Werewolf::WerewolfGameDBService.get gameroom.id
+  #   expect(room).to eq(gameroom)
+  # end
 end
