@@ -6,25 +6,30 @@ import {
 import ReactPolling from 'react-polling';
 import WaitingRoom from '../waitingRoom/waitingRoom';
 import Playroom from '../playroom/playroom';
+import {getHeaders} from '../../utils/index';
 
 
 const Board = () => {
   let {game} = useParams();
 
-  const [gameState, setGameState] = useState({
-    id: game,
-    created: null,
-    roster: [{name:'HANNAH'}, {name:'TOPH'}, {name:'LAUREN'}],
-    location: { day: 0, time: 'night' },
-    hasStarted: false,
-    isFinished: false,
-    winner: ''
+  const [gameState, setGameState] = useState({game:{
+      id: game,
+      created: null,
+      roster: [{name:'HANNAH'}, {name:'TOPH'}, {name:'LAUREN'}],
+      location: { day: 0, time: 'night' },
+      hasStarted: false,
+      isFinished: false,
+      winner: ''
+    },
+    vote: [],
+    role: ""
   });
 
   return (
   <div className={styles.board} data-testid="board">
     <ReactPolling
       url={process.env.REACT_APP_API_URL + '/gameroom/' + game }
+      headers={getHeaders()}
       interval= {3000} // in milliseconds(ms)
       retryCount={3} // this is optional
       onSuccess={(data) => {
@@ -38,7 +43,7 @@ const Board = () => {
           <div>
             <div> 
               {!gameState.hasStarted?
-              <WaitingRoom gameState={gameState}></WaitingRoom>
+              <WaitingRoom gameState={gameState.game}></WaitingRoom>
               :<Playroom></Playroom>}
             </div>
             {JSON.stringify(gameState)}

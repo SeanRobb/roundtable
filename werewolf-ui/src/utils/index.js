@@ -9,13 +9,17 @@ const registerUser = (gameId,userId) =>{
   };
 
   return fetch(process.env.REACT_APP_API_URL+'/gameroom/' + gameId + '/register',requestOptions)
-    .then((res) => res.json());
+    .then((res) => res.json())
+    .then((data)=>{
+      localStorage.setItem('token', data.bearer);
+      return data;
+    });
 };
 
 const startGame = (gameId) =>{
   const requestOptions = {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
   };
 
   return fetch(process.env.REACT_APP_API_URL+'/gameroom/' + gameId + '/start',requestOptions)
@@ -32,4 +36,9 @@ const createGameRoom = () => {
     .then((res) => res.json());
 };
 
-export { createGameRoom , registerUser, startGame };
+const getHeaders = () =>{
+  const token = localStorage.getItem("token");
+  return token ? { 'Content-Type': 'application/json', "Authorization": "Bearer " + token } : { 'Content-Type': 'application/json' }
+};
+
+export { createGameRoom , registerUser, startGame, getHeaders };

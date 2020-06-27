@@ -2,6 +2,7 @@ require "bundler/setup"
 require "werewolf/api"
 require "werewolf/server"
 require './spec/helpers'
+require 'rack/test'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -14,5 +15,6 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
+  config.include Rack::Test::Methods
   config.include Helpers
 end
