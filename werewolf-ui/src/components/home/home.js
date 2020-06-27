@@ -12,7 +12,7 @@ return (
   <div className={styles.home} data-testid="home">
     <h2>Home Page Breakout</h2>
     <Button color="primary" onClick={() => {
-      createGameRoom().then((data) => history.push('/' + data.gameId + '/board'));
+      createGameRoom().then((data)=>{console.log(data); return data;}).then((data) => history.push('/' + data.id + '/board'));
     }}>Create Werewolf Game Room</Button>
   </div>
 )

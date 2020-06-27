@@ -11,7 +11,7 @@ Resources:
       - DynamoDBCrudPolicy:
           TableName:
             Ref: WerewolfGamesTable
-      CodeUri: s3://werewolf-api/2b3ec58787cc08c2aa913cff8e041fdb
+      CodeUri: s3://werewolf-api/2254566438f01fd6a4bef70eff79528b
       MemorySize: 512
       Timeout: 30
       Events:

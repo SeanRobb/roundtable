@@ -16,7 +16,7 @@ function Register(props){
 
   function handleSubmit(event) {
     event.preventDefault();
-    registerUser(name,gameId)
+    registerUser(gameId,name)
     .then(() => {
       history.push('/' + gameId + '/board');
     });

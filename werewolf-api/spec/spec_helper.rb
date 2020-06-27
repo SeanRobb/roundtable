@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "werewolf/api"
+require "werewolf/server"
 require './spec/helpers'
 
 RSpec.configure do |config|

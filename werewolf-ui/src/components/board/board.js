@@ -1,11 +1,11 @@
-import React, { useState, useEffect }  from 'react';
-import PropTypes from 'prop-types';
+import React, { useState }  from 'react';
 import styles from './board.module.css';
 import {
   useParams
 } from "react-router-dom";
-import {fetchStatus} from '../../utils/index';
 import ReactPolling from 'react-polling';
+import WaitingRoom from '../waitingRoom/waitingRoom';
+import Playroom from '../playroom/playroom';
 
 
 const Board = () => {
@@ -13,13 +13,8 @@ const Board = () => {
 
   const [gameState, setGameState] = useState({
     id: game,
-    created: 1592600150593,
-    activePlayers: ['HANNAH', 'TOPH', 'LAUREN'],
-    narrator:'SEAN',
-    vote: {
-      TOPH: ['LAUREN', 'HANNAH'],
-    },
-    werewolves: 1,
+    created: null,
+    roster: [{name:'HANNAH'}, {name:'TOPH'}, {name:'LAUREN'}],
     location: { day: 0, time: 'night' },
     hasStarted: false,
     isFinished: false,
@@ -29,7 +24,7 @@ const Board = () => {
   return (
   <div className={styles.board} data-testid="board">
     <ReactPolling
-      url={'https://trs2utmz46.execute-api.us-east-1.amazonaws.com/dev/gameroom/' + game }
+      url={process.env.REACT_APP_API_URL + '/gameroom/' + game }
       interval= {3000} // in milliseconds(ms)
       retryCount={3} // this is optional
       onSuccess={(data) => {
@@ -40,7 +35,12 @@ const Board = () => {
       method={'GET'}
       render={({ startPolling, stopPolling, isPolling }) => {
         return (
-          <div> 
+          <div>
+            <div> 
+              {!gameState.hasStarted?
+              <WaitingRoom gameState={gameState}></WaitingRoom>
+              :<Playroom></Playroom>}
+            </div>
             {JSON.stringify(gameState)}
           </div>
         );
