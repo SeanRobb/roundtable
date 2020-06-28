@@ -239,8 +239,72 @@ RSpec.describe Werewolf do
         }
         expect {@werewolfGame.submitVote(player:@werewolfGame.narrator.name,voteFor: @werewolfGame.activePlayers[0].name)}.to raise_error "Only active players can vote"
         expect {@werewolfGame.submitVote(player:@werewolfGame.activePlayers[0].name,voteFor: @werewolfGame.activePlayers[0].name+"123")}.to raise_error "Only active players can be voted for"
-  
-  
+      end
+      it "Returns Villager Role in day" do
+        villager=@werewolfGame.roster.find {|player| player.isActive && !player.isWerewolf && !player.isNarrator}
+        @werewolfGame.sendToDay(@werewolfGame.narrator.name)
+        role = @werewolfGame.getRole(villager.name)
+        expect(role[:name]).to eq("Villager") 
+        expect(role[:description]).to eq("Villagers are working hard to settle their new town." +
+        " There is wearwolves in the town and during the day the villager vote to hang" +
+        " who they believe is a werewolf. Votes during the day will be decided in a Majority") 
+        validBallot = @werewolfGame.roster.select {|player| (player.isActive && player.name != villager.name)}.map {|player| player.name}
+        expect(role[:ballot]).to eq(validBallot) 
+        expect(role[:isActive]).to be_truthy
+      end
+      it "Returns Villager Role in night" do
+        villager=@werewolfGame.roster.find {|player| player.isActive && !player.isWerewolf && !player.isNarrator}
+        @werewolfGame.sendToNight(@werewolfGame.narrator.name)
+        role = @werewolfGame.getRole(villager.name)
+        expect(role[:name]).to eq("Villager") 
+        expect(role[:description]).to eq("Villagers are working hard to settle their new town." +
+        " There is wearwolves in the town and during the day the villager vote to hang" +
+        " who they believe is a werewolf. Votes during the day will be decided in a Majority") 
+        expect(role[:ballot]).to eq([]) 
+        expect(role[:isActive]).to be_truthy
+      end
+      it "Returns Werewolf Role in day" do
+        werewolf=@werewolfGame.roster.find {|player| player.isActive && player.isWerewolf && !player.isNarrator}
+        @werewolfGame.sendToDay(@werewolfGame.narrator.name)
+        role = @werewolfGame.getRole(werewolf.name)
+        expect(role[:name]).to eq("Werewolf") 
+        expect(role[:description]).to eq("At night werewolves vote for which villager to attack." +
+        " Night votes must be unanimous. During the day werewolves must blend in" +
+        " with the other villagers they can vote and debate like all other villagers." +
+        " Villagers votes will need a majority during the day.") 
+        validBallot = @werewolfGame.roster.select {|player| (player.isActive && player.name != werewolf.name)}.map {|player| player.name}
+        expect(role[:ballot]).to eq(validBallot) 
+        expect(role[:isActive]).to be_truthy
+      end
+      it "Returns Werewolf Role in night" do
+        werewolf=@werewolfGame.roster.find {|player| player.isActive && player.isWerewolf && !player.isNarrator}
+        @werewolfGame.sendToNight(@werewolfGame.narrator.name)
+        role = @werewolfGame.getRole(werewolf.name)
+        expect(role[:name]).to eq("Werewolf") 
+        expect(role[:description]).to eq("At night werewolves vote for which villager to attack." +
+        " Night votes must be unanimous. During the day werewolves must blend in" +
+        " with the other villagers they can vote and debate like all other villagers." +
+        " Villagers votes will need a majority during the day.") 
+        validBallot = @werewolfGame.roster.select {|player| (player.isActive && player.name != werewolf.name)}.map {|player| player.name}
+        expect(role[:ballot]).to eq(validBallot) 
+        expect(role[:isActive]).to be_truthy
+      end
+      it "Returns Narrator Role" do
+        @werewolfGame.sendToDay(@werewolfGame.narrator.name)
+        role = @werewolfGame.getRole(@werewolfGame.narrator.name)
+        expect(role[:name]).to eq("Narrator") 
+        expect(role[:description]).to eq("The narrator will be the story teller of this village." +
+        " You control when days change and will inform players when to go to sleep" +
+        " and wake up.") 
+        expect(role[:ballot]).to eq([]) 
+        @werewolfGame.sendToNight(@werewolfGame.narrator.name)
+        role = @werewolfGame.getRole(@werewolfGame.narrator.name)
+        expect(role[:name]).to eq("Narrator") 
+        expect(role[:description]).to eq("The narrator will be the story teller of this village." +
+        " You control when days change and will inform players when to go to sleep" +
+        " and wake up.") 
+        expect(role[:ballot]).to eq([]) 
+        expect(role[:isActive]).to be_falsey
       end
     end
     describe "1 werewolf" do

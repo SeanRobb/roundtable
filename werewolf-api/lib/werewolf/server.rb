@@ -25,12 +25,17 @@ class WerewolfAPI < Sinatra::Base
 
   # Get Gameroom information
   get '/gameroom/:gameroomid' do |gameroomid|
-    auth_token = request.env['HTTP_AUTHORIZATION']
+    auth_token = decodeToken(request)
     werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid 
+    role ={}
+    if (auth_token)
+      role = werewolfGame.getRole(auth_token["username"])
+    end
+
     {
       game: werewolfGame,
-      vote: [],
-      role: ""
+      results: [],
+      role: role
     }.to_json
   end
 
@@ -100,6 +105,7 @@ class WerewolfAPI < Sinatra::Base
 
   def decodeToken(request)
     auth_token = request.env['HTTP_AUTHORIZATION']
+    return nil unless auth_token
     auth_token.slice! "Bearer "
     token = JWT.decode auth_token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' }
     token [0]

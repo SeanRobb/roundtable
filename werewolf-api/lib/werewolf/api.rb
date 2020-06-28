@@ -90,8 +90,6 @@ module Werewolf
 
       player= roster.find { |player| player.name == playerToDeactivate.first}
 
-      # player = playerToDeactivate.first
-
       player.isActive = false
 
 
@@ -107,6 +105,43 @@ module Werewolf
       voteFor = activePlayers.find {|activePlayer| activePlayer.name == params.fetch(:voteFor)}
       raise "Only active players can be voted for" if voteFor.nil?
       player.vote = voteFor.name
+    end
+    def getRole(playerName)
+      player = @roster.find {|player| player.name == playerName}
+
+      role ={
+        name:"",
+        description:"",
+        isActive: player.isActive,
+        ballot:[],
+      }
+      if player.isWerewolf 
+        role[:name] = "Werewolf"
+        role[:description] = "At night werewolves vote for which villager to attack." +
+        " Night votes must be unanimous. During the day werewolves must blend in" +
+        " with the other villagers they can vote and debate like all other villagers." +
+        " Villagers votes will need a majority during the day."
+      elsif player.isNarrator
+        role[:name] = "Narrator" 
+        role[:description] = "The narrator will be the story teller of this village." +
+        " You control when days change and will inform players when to go to sleep" +
+        " and wake up."
+      else 
+        role[:name] = "Villager"
+        role[:description] = "Villagers are working hard to settle their new town." +
+        " There is wearwolves in the town and during the day the villager vote to hang" +
+        " who they believe is a werewolf. Votes during the day will be decided in a Majority"
+      end
+
+      if !player.isNarrator && !@location.isNight
+        role[:ballot] = @roster.select {|player| (player.isActive && player.name != playerName)}.map {|player| player.name}
+      end
+
+      if player.isWerewolf && @location.isNight
+        role[:ballot] = @roster.select {|player| (player.isActive && !player.isWerewolf && player.name != playerName)}.map {|player| player.name}
+      end
+
+      return role
     end
     def narrator()
       return roster.find { |player|
@@ -207,7 +242,7 @@ module Werewolf
         isActive: parsedJSON.fetch("isActive",false),vote: parsedJSON.fetch("vote",nil))
       end
       def to_s
-        "#{name}"
+        "#{name} - #{isWerewolf ? "Werewolf": (isNarrator ? "Narrator": "Villager")} - #{isActive ? "Active": "Inactive"}"
       end
       def as_json(options={})
         hashedVote = '' if @vote.nil?

@@ -9,9 +9,14 @@ RSpec.describe WerewolfAPI do
   describe "Game Modification Endpoints" do  
     before do
       @token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IlNlYW4iLCJpYXQiOjE1OTMyOTI0NjZ9.uFEUKXW6rUowmNH03DZHrCL39bJ9oI4E_CT8lyeX8rQ"
+      @player = Werewolf::Gameroom::Player.new(name:"Sean")
+      @player.isActive = true
       @stubGameroom = object_double(Werewolf::Gameroom.new, :addPlayer => [],
         :id => "SWSG", :submitVote => true, :start => true, :sendToDay => true,
-        :sendToNight => true)
+        :sendToNight => true, :roster => [@player], :getRole => {
+          name: "This Is My Role",
+          description: "This is my Descripition"
+        })
       allow(Werewolf::Gameroom).to receive(:new).and_return(@stubGameroom)
       allow(Werewolf::WerewolfGameDBService).to receive(:save).with(@stubGameroom)
       allow(Werewolf::WerewolfGameDBService).to receive(:get).with(@stubGameroom.id).and_return(@stubGameroom)
@@ -30,7 +35,7 @@ RSpec.describe WerewolfAPI do
         let(:response) {get "/gameroom/#{@stubGameroom.id}"}
         it "returns gameroom" do
           expect(response.status).to eq 200
-          expect(response.body).to eq({game:@stubGameroom,vote:[],role:""}.to_json)
+          expect(response.body).to eq({game:@stubGameroom,vote:[],role:{}}.to_json)
         end
       end
       context "Register to a gameroom" do
@@ -52,7 +57,11 @@ RSpec.describe WerewolfAPI do
         }
         it "returns gameroom" do
           expect(response.status).to eq 200
-          expect(response.body).to eq({game:@stubGameroom,vote:[],role:""}.to_json)
+          data = JSON.parse(response.body)
+          expect(response.body).to include(@stubGameroom.to_json)
+          expect(data["vote"]).to eq([])
+          expect(data["role"]["name"]).to eq("This Is My Role")
+          expect(data["role"]["description"]).to eq("This is my Descripition")
         end
       end
       context "Submit vote" do
