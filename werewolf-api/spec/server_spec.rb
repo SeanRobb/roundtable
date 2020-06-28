@@ -35,7 +35,7 @@ RSpec.describe WerewolfAPI do
         let(:response) {get "/gameroom/#{@stubGameroom.id}"}
         it "returns gameroom" do
           expect(response.status).to eq 200
-          expect(response.body).to eq({game:@stubGameroom,vote:[],role:{}}.to_json)
+          expect(response.body).to eq({game:@stubGameroom,results:[],role:{}}.to_json)
         end
       end
       context "Register to a gameroom" do
@@ -59,7 +59,7 @@ RSpec.describe WerewolfAPI do
           expect(response.status).to eq 200
           data = JSON.parse(response.body)
           expect(response.body).to include(@stubGameroom.to_json)
-          expect(data["vote"]).to eq([])
+          expect(data["results"]).to eq([])
           expect(data["role"]["name"]).to eq("This Is My Role")
           expect(data["role"]["description"]).to eq("This is my Descripition")
         end

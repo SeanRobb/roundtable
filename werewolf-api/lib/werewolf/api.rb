@@ -143,6 +143,17 @@ module Werewolf
 
       return role
     end
+    def getVotes()
+      tally = Hash.new { |h, k| h[k] = [] }
+      activeWerewolves.each {|player| 
+      tally[player.vote].append(player.name)
+      } if @location.isNight
+
+      activePlayers.each {|player| 
+        tally[player.vote].append(player.name)
+      } unless @location.isNight
+      tally
+    end
     def narrator()
       return roster.find { |player|
         player.isNarrator
@@ -242,7 +253,7 @@ module Werewolf
         isActive: parsedJSON.fetch("isActive",false),vote: parsedJSON.fetch("vote",nil))
       end
       def to_s
-        "#{name} - #{isWerewolf ? "Werewolf": (isNarrator ? "Narrator": "Villager")} - #{isActive ? "Active": "Inactive"}"
+        "#{name} - #{isWerewolf ? "Werewolf": (isNarrator ? "Narrator": "Villager")} - #{isActive ? "Active": "Inactive"} - Voting For: #{vote}"
       end
       def as_json(options={})
         hashedVote = '' if @vote.nil?

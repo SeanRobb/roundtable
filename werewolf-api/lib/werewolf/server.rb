@@ -31,7 +31,6 @@ class WerewolfAPI < Sinatra::Base
     if (auth_token)
       role = werewolfGame.getRole(auth_token["username"])
     end
-
     {
       game: werewolfGame,
       results: [],
