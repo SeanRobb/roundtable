@@ -15,7 +15,7 @@ const Board = () => {
   const [gameState, setGameState] = useState({game:{
       id: game,
       created: null,
-      roster: [{name:'HANNAH'}, {name:'TOPH'}, {name:'LAUREN'}],
+      roster: [],
       location: { day: 0, time: 'night' },
       hasStarted: false,
       isFinished: false,
@@ -42,11 +42,11 @@ const Board = () => {
         return (
           <div>
             <div> 
-              {!gameState.hasStarted?
+              {!gameState.game.hasStarted?
               <WaitingRoom gameState={gameState.game}></WaitingRoom>
-              :<Playroom></Playroom>}
+              :<Playroom gameState={gameState}></Playroom>}
             </div>
-            {JSON.stringify(gameState)}
+            {/* {JSON.stringify(gameState)} */}
           </div>
         );
       }}

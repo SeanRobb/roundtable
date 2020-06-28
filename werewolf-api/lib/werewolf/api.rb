@@ -108,7 +108,7 @@ module Werewolf
     end
     def getRole(playerName)
       player = @roster.find {|player| player.name == playerName}
-
+      return {} unless player
       role ={
         name:"",
         description:"",
@@ -146,11 +146,11 @@ module Werewolf
     def getVotes()
       tally = Hash.new { |h, k| h[k] = [] }
       activeWerewolves.each {|player| 
-      tally[player.vote].append(player.name)
+      tally[player.vote].append(player.name) unless player.vote.empty?
       } if @location.isNight
 
       activePlayers.each {|player| 
-        tally[player.vote].append(player.name)
+        tally[player.vote].append(player.name) unless player.vote.empty?
       } unless @location.isNight
       tally
     end

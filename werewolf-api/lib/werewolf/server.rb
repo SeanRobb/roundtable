@@ -33,7 +33,7 @@ class WerewolfAPI < Sinatra::Base
     end
     {
       game: werewolfGame,
-      results: [],
+      results: werewolfGame.getVotes,
       role: role
     }.to_json
   end
