@@ -12,7 +12,7 @@ import {getHeaders} from '../../utils/index';
 const Board = () => {
   let {game} = useParams();
 
-  const [gameState, setGameState] = useState({game:{
+  const [state, setState] = useState({game:{
       id: game,
       created: null,
       roster: [],
@@ -33,7 +33,7 @@ const Board = () => {
       interval= {3000} // in milliseconds(ms)
       retryCount={3} // this is optional
       onSuccess={(data) => {
-        setGameState(data);
+        setState(data);
         return true;
       }}
       onFailure={() => console.log('handle failure')} // this is optional
@@ -42,11 +42,11 @@ const Board = () => {
         return (
           <div>
             <div> 
-              {!gameState.game.hasStarted?
-              <WaitingRoom gameState={gameState.game}></WaitingRoom>
-              :<Playroom gameState={gameState}></Playroom>}
+              {!state.game.hasStarted?
+              <WaitingRoom state={state.game}></WaitingRoom>
+              :<Playroom state={state}></Playroom>}
             </div>
-            {/* {JSON.stringify(gameState)} */}
+            {/* {JSON.stringify(state)} */}
           </div>
         );
       }}

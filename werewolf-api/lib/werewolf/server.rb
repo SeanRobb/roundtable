@@ -44,10 +44,12 @@ class WerewolfAPI < Sinatra::Base
     req = request.body.read
     data = JSON.parse req
     werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid
-    #if player does not already exist
     player = Werewolf::Gameroom::Player.new(name:data['username'])
-    werewolfGame.addPlayer(player)
-    Werewolf::WerewolfGameDBService.save werewolfGame
+    
+    unless werewolfGame.roster.include? player
+      werewolfGame.addPlayer(player) 
+      Werewolf::WerewolfGameDBService.save werewolfGame
+    end
     
     {
       game: werewolfGame,

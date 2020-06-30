@@ -113,6 +113,7 @@ module Werewolf
         name:"",
         description:"",
         isActive: player.isActive,
+        isAsleepAtNight: false,
         ballot:[],
       }
       if player.isWerewolf 
@@ -131,6 +132,7 @@ module Werewolf
         role[:description] = "Villagers are working hard to settle their new town." +
         " There is wearwolves in the town and during the day the villager vote to hang" +
         " who they believe is a werewolf. Votes during the day will be decided in a Majority"
+        role[:isAsleepAtNight] = true
       end
 
       if !player.isNarrator && !@location.isNight

@@ -8,21 +8,21 @@ const WaitingRoom = (props) => {
 
 function start(event) {
   event.preventDefault();
-  startGame(props.gameState.id);
+  startGame(props.state.id);
 };
 
 return (
   <div className={styles.WaitingRoom} data-testid="WaitingRoom">
     <div>
-      Welcome to the Waiting Room for {props.gameState.id}
+      Welcome to the Waiting Room for {props.state.id}
     </div>
     <div>Players in room:</div>
-    {props.gameState.roster.map((player) => {
+    {props.state.roster.map((player) => {
       return <WaitingRoomPlayer key={player.name} player={player}></WaitingRoomPlayer>
     })}
     <div>
-      <div> {props.gameState.roster.length < 6? "You need at least 7 players to play":"Ready to play?"}</div>
-      <button onClick={start} disabled={props.gameState.roster.length < 6}>
+      <div> {props.state.roster.length < 6? "You need at least 7 players to play":"Ready to play?"}</div>
+      <button onClick={start} disabled={props.state.roster.length < 6}>
         Start Game
       </button>
     </div>
