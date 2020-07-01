@@ -115,6 +115,7 @@ module Werewolf
         isActive: player.isActive,
         isAsleepAtNight: false,
         ballot:[],
+        vote: player.vote
       }
       if player.isWerewolf 
         role[:name] = "Werewolf"
@@ -157,7 +158,14 @@ module Werewolf
       activePlayers.each {|player| 
         tally[player.vote].append(player.name) unless player.vote.empty?
       } unless @location.isNight
-      tally
+
+      needs = activeWerewolves.length if @location.isNight
+      needs = (activePlayers.length/2).floor unless @location.isNight
+
+      {
+        needs: needs,
+        votes: tally
+      }
     end
     def narrator()
       return roster.find { |player|

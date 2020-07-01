@@ -16,6 +16,19 @@ const registerUser = (gameId,userId) =>{
     });
 };
 
+const vote = (gameId,voteFor) =>{
+  const requestOptions = {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({
+      vote:voteFor
+    })
+  };
+
+  return fetch(process.env.REACT_APP_API_URL+'/gameroom/' + gameId + '/vote',requestOptions)
+    .then((res) => res.json());
+};
+
 const startGame = (gameId) =>{
   const requestOptions = {
     method: 'POST',
@@ -41,4 +54,4 @@ const getHeaders = () =>{
   return token ? { 'Content-Type': 'application/json', "Authorization": "Bearer " + token } : { 'Content-Type': 'application/json' }
 };
 
-export { createGameRoom , registerUser, startGame, getHeaders };
+export { createGameRoom , registerUser, startGame, vote, getHeaders };

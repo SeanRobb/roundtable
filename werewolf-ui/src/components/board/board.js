@@ -30,7 +30,7 @@ const Board = () => {
       isFinished: false,
       winner: ''
     },
-    vote: [],
+    results: [],
     role: ""
   });
 

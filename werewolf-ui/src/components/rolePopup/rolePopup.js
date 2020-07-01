@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './rolePopup.module.css';
-import Modal from '@material-ui/core/Modal';
 import Dialog from '@material-ui/core/Dialog';
 import Box from '@material-ui/core/Box';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -16,7 +15,7 @@ const RolePopup = (props) => (
     <DialogTitle>
       {props.role.name}
     </DialogTitle>
-    <DialogContentText>{props.role.description}</DialogContentText>
+    <DialogContentText style={{padding:'15px'}}>{props.role.description}</DialogContentText>
   </Box>  
 </Dialog>
 );

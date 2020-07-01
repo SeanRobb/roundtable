@@ -9,7 +9,8 @@ import Fab from '@material-ui/core/Fab';
 import HowToVoteIcon from '@material-ui/icons/HowToVote';
 import PersonIcon from '@material-ui/icons/Person';
 import Box from '@material-ui/core/Box';
-import Modal from '@material-ui/core/Modal';
+import {vote} from '../../utils/index';
+import { List, ListItem, Typography } from '@material-ui/core';
 
 const Playroom = (props) => {
   //TODO updates to props.state do not propagate
@@ -21,6 +22,14 @@ const Playroom = (props) => {
       showVotePopUp: false 
     });  
   };  
+
+  function submitVote(player) {  
+    setState({
+      showRolePopUp: false, 
+      showVotePopUp: false 
+    });  
+    vote(props.state.game.id, player);
+  }; 
 
   function toggleVotePopup() {  
     setState({
@@ -34,10 +43,18 @@ const Playroom = (props) => {
     <div>
       Active: {props.state.role.isActive ? "Yes" : "No"}
     </div>
-    {props.state.game.location.isNight? 
-      <NightPlayroom state={props.state}></NightPlayroom> :
-      <DayPlayroom  state={props.state}></DayPlayroom>
-    }
+
+    <List>
+      {Object.entries(props.state.results.votes).map((entries) => {
+        return (
+        <ListItem key={entries[0]}>
+          <Typography variant="body1">{entries[0]}:</Typography>
+           {entries[1].map((person)=> <PersonIcon key={person}/>)}
+        </ListItem> 
+        );
+      })}
+
+    </List>
 
     <RolePopup  
       open={state.showRolePopUp}
@@ -45,15 +62,15 @@ const Playroom = (props) => {
       role={props.state.role}
     />  
 
-    {state.showVotePopUp ?  
-      <VotePopup  
-                ballot={props.state.role.ballot}
-      />  
-      : ""
-    } 
-    <Fab variant="extended" onClick={toggleVotePopup} ><div><HowToVoteIcon/> Vote</div></Fab>    
+    <VotePopup  
+      open={state.showVotePopUp}
+      onClose={toggleVotePopup}
+      ballot={props.state.role.ballot}
+      onVote={submitVote}
+    />  
 
     <Box style={{position: 'fixed', bottom: '7px', right:'7px'}} >
+      <Fab variant="extended" onClick={toggleVotePopup} disabled={props.state.role.ballot.length <= 0}><div><HowToVoteIcon/> Vote</div></Fab>    
       <Fab variant="extended" onClick={toggleRolePopup} ><div><PersonIcon/> Role</div></Fab>    
     </Box>
   </div>
