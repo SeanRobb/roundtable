@@ -129,9 +129,12 @@ module Werewolf
         " and wake up."
       else 
         role[:name] = "Villager"
-        role[:description] = "Villagers are working hard to settle their new town." +
-        " There is wearwolves in the town and during the day the villager vote to hang" +
-        " who they believe is a werewolf. Votes during the day will be decided in a Majority"
+        role[:description] = "Villagers work hard to settle their new town. Hidden amonst this group of villagers their are werewolves."+
+        " For the success of the town it is critical to remove all of the werewolves. Every night the werewolves hunt villagers and "+
+        "every day the villagers vote who they believe is a werewolf. The vote is based on a majority. If the villagers successfully "+
+        "vote for a werewolf then that werewolf will be removed from the village never to return. It is a race against time, will the "+
+        "villagers find and remove all of the werewolves before the werewolves attack all of the villagers? Do your best to decide who "+
+        "you can trust."
         role[:isAsleepAtNight] = true
       end
 

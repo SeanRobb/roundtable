@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styles from './waitingRoom.module.css';
 import WaitingRoomPlayer from '../waitingRoomPlayer/waitingRoomPlayer';
 import {startGame} from '../../utils/index';
+import Button from '@material-ui/core/Button';  
 
 const WaitingRoom = (props) => {
 
@@ -22,9 +23,9 @@ return (
     })}
     <div>
       <div> {props.state.roster.length < 6? "You need at least 7 players to play":"Ready to play?"}</div>
-      <button onClick={start} disabled={props.state.roster.length < 6}>
+      <Button variant="outlined" onClick={start} disabled={props.state.roster.length < 6}>
         Start Game
-      </button>
+      </Button>
     </div>
   </div>
 )};

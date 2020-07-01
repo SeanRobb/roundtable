@@ -5,6 +5,11 @@ import NightPlayroom from '../nightPlayroom/nightPlayroom';
 import DayPlayroom from '../dayPlayroom/dayPlayroom';
 import RolePopup from '../rolePopup/rolePopup';
 import VotePopup from '../votePopup/votePopup';
+import Fab from '@material-ui/core/Fab';  
+import HowToVoteIcon from '@material-ui/icons/HowToVote';
+import PersonIcon from '@material-ui/icons/Person';
+import Box from '@material-ui/core/Box';
+import Modal from '@material-ui/core/Modal';
 
 const Playroom = (props) => {
   //TODO updates to props.state do not propagate
@@ -33,20 +38,24 @@ const Playroom = (props) => {
       <NightPlayroom state={props.state}></NightPlayroom> :
       <DayPlayroom  state={props.state}></DayPlayroom>
     }
-    {state.showRolePopUp ?  
-      <RolePopup  
-                role={props.state.role}
-      />  
-      : ""
-    } 
+
+    <RolePopup  
+      open={state.showRolePopUp}
+      onClose={toggleRolePopup}
+      role={props.state.role}
+    />  
+
     {state.showVotePopUp ?  
       <VotePopup  
                 ballot={props.state.role.ballot}
       />  
       : ""
     } 
-    <button onClick={toggleRolePopup} >{state.showRolePopUp ?  "X" : "Role"}</button>    
-    <button onClick={toggleVotePopup} >{state.showVotePopUp ?  "X": "Vote"}</button>    
+    <Fab variant="extended" onClick={toggleVotePopup} ><div><HowToVoteIcon/> Vote</div></Fab>    
+
+    <Box style={{position: 'fixed', bottom: '7px', right:'7px'}} >
+      <Fab variant="extended" onClick={toggleRolePopup} ><div><PersonIcon/> Role</div></Fab>    
+    </Box>
   </div>
 )};
 
