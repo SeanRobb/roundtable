@@ -28,9 +28,7 @@ class WerewolfAPI < Sinatra::Base
     auth_token = decodeToken(request)
     werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid 
     role ={}
-    if (auth_token)
-      role = werewolfGame.getRole(auth_token["username"])
-    end
+    role = werewolfGame.getRole(auth_token["username"]) if (auth_token)
     {
       game: werewolfGame,
       results: werewolfGame.getVotes,
@@ -50,7 +48,7 @@ class WerewolfAPI < Sinatra::Base
       werewolfGame.addPlayer(player) 
       Werewolf::WerewolfGameDBService.save werewolfGame
     end
-    
+
     {
       game: werewolfGame,
       bearer: encodeToken(player:player)
@@ -84,10 +82,20 @@ class WerewolfAPI < Sinatra::Base
     decoded_token=decodeToken(request)
 
     werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid
-    werewolfGame.sendToDay decoded_token["username"] if timeOfDay == 'day'
-    werewolfGame.sendToNight decoded_token["username"] if timeOfDay == 'night'
+    if timeOfDay == 'day'
+      print "Sending To Day"
+      deactivatedPlayer = werewolfGame.sendToDay decoded_token["username"] 
+    end
+    if timeOfDay == 'night'
+      print "Sending to Night"
+      deactivatedPlayer = werewolfGame.sendToNight decoded_token["username"]
+    end
     Werewolf::WerewolfGameDBService.save werewolfGame
-    werewolfGame.to_json
+    
+    {
+      game: werewolfGame,
+      deactivatedPlayer: deactivatedPlayer
+    }.to_json
   end
 
   # Needed for CORS

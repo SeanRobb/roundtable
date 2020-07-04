@@ -1,3 +1,9 @@
+import jwt from 'jwt-decode';
+
+const getURL=() =>{
+  return process.env.REACT_APP_API_URL;
+}
+
 const registerUser = (gameId,userId) =>{
   console.log(userId +" " +gameId)
   const requestOptions = {
@@ -8,12 +14,22 @@ const registerUser = (gameId,userId) =>{
     })
   };
 
-  return fetch(process.env.REACT_APP_API_URL+'/gameroom/' + gameId + '/register',requestOptions)
+  return fetch(getURL()+'/gameroom/' + gameId + '/register',requestOptions)
     .then((res) => res.json())
     .then((data)=>{
       localStorage.setItem('token', data.bearer);
       return data;
     });
+};
+
+const changeTimeOfDay = (gameId,timeOfDay) =>{
+  const requestOptions = {
+    method: 'POST',
+    headers: getHeaders()
+  };
+
+  return fetch(getURL()+'/gameroom/' + gameId + '/' + timeOfDay,requestOptions)
+    .then((res) => res.json());
 };
 
 const vote = (gameId,voteFor) =>{
@@ -25,7 +41,7 @@ const vote = (gameId,voteFor) =>{
     })
   };
 
-  return fetch(process.env.REACT_APP_API_URL+'/gameroom/' + gameId + '/vote',requestOptions)
+  return fetch(getURL()+'/gameroom/' + gameId + '/vote',requestOptions)
     .then((res) => res.json());
 };
 
@@ -35,7 +51,7 @@ const startGame = (gameId) =>{
     headers: getHeaders(),
   };
 
-  return fetch(process.env.REACT_APP_API_URL+'/gameroom/' + gameId + '/start',requestOptions)
+  return fetch(getURL()+'/gameroom/' + gameId + '/start',requestOptions)
     .then((res) => res.json());
 };
 
@@ -45,7 +61,7 @@ const createGameRoom = () => {
     headers: { 'Content-Type': 'application/json' },
   };
 
-  return fetch(process.env.REACT_APP_API_URL+ '/gameroom',requestOptions)
+  return fetch(getURL()+ '/gameroom',requestOptions)
     .then((res) => res.json());
 };
 
@@ -54,4 +70,17 @@ const getHeaders = () =>{
   return token ? { 'Content-Type': 'application/json', "Authorization": "Bearer " + token } : { 'Content-Type': 'application/json' }
 };
 
-export { createGameRoom , registerUser, startGame, vote, getHeaders };
+const getUsername= () =>{
+  const decodedToken = localStorage.getItem("token");
+  if(decodedToken){
+    return jwt(decodedToken)['username'];
+  }
+  return '';
+}
+
+const clearUsername= () =>{
+  localStorage.clear();
+  return '';
+}
+
+export { createGameRoom , registerUser, startGame, vote, getHeaders, getUsername, clearUsername, changeTimeOfDay };

@@ -3,7 +3,7 @@ require 'aws-record'
 
 module Werewolf
   class Gameroom
-    attr_accessor :id, :created, :roster, :location, :hasStarted, :hasFinished, :villigeWins
+    attr_accessor :id, :created, :roster, :location, :hasStarted, :hasFinished, :villageWins
     def initialize(params = {})
       @id = params.fetch(:id, (0...4).map { (65 + rand(26)).chr }.join)
       @created = params.fetch(:created, Time.now.getutc)
@@ -15,7 +15,7 @@ module Werewolf
       @location = Location.from_json(@location) unless @location.is_a? (Location)
       @hasStarted = params.fetch(:hasStarted, false)
       @hasFinished = params.fetch(:hasFinished, false)
-      @villigeWins = params.fetch(:hasFinished, false)
+      @villageWins = params.fetch(:villageWins, false)
     end
     def addPlayer(player)
       raise 'Player already exists' if roster.include? player
@@ -60,16 +60,21 @@ module Werewolf
         vote = nil
       }
       playerToDeactivate = tally.find {|player, value| value >= activeWerewolves.length}
+
+      activeWerewolves.each { |player|
+        player.resetVote
+      }
       # No Player has enough votes to be deactivated
       return nil if playerToDeactivate.nil?
 
       player= roster.find { |player| player.name == playerToDeactivate.first}
-      # player = playerToDeactivate.first
+
+      return nil if player.nil?
 
       player.isActive = false
 
       @hasFinished = true if activeVillagers.length == 0
-      @villigeWins = false if activeVillagers.length == 0 
+      @villageWins = false if activeVillagers.length == 0 
 
       player
     end
@@ -81,21 +86,27 @@ module Werewolf
       tally = Hash.new(0)
       activePlayers.map{|player| player.vote}.each {|vote| 
         tally[vote]+=1 unless vote.nil?
-        vote = nil
       }
       majorityNeeded = (activePlayers.length/2).floor
       playerToDeactivate = tally.find {|player, value| value > majorityNeeded}
+
+      activePlayers.each { |player|
+        player.resetVote
+      }
       # No Player has enough votes to be deactivated
       return nil if playerToDeactivate.nil?
 
       player= roster.find { |player| player.name == playerToDeactivate.first}
 
+      # No Player has enough votes to be deactivated
+      return nil if player.nil?
+
       player.isActive = false
 
 
       @hasFinished = true if activeWerewolves.length == 0 or activeVillagers.length == 0
-      @villigeWins = true if activeWerewolves.length == 0 
-      @villigeWins = false if activeVillagers.length == 0 
+      @villageWins = true if activeWerewolves.length == 0 
+      @villageWins = false if activeVillagers.length == 0 
 
       player
     end
@@ -160,7 +171,7 @@ module Werewolf
       } unless @location.isNight
 
       needs = activeWerewolves.length if @location.isNight
-      needs = (activePlayers.length/2).floor unless @location.isNight
+      needs = (activePlayers.length/2).floor + 1 unless @location.isNight
 
       {
         needs: needs,
@@ -188,7 +199,7 @@ module Werewolf
       }
     end
     def to_s
-      "#{id} #{roster}"
+      "Id: #{id} Roster: #{roster} V Wins: #{villageWins}"
     end
     def as_json(options={})
       {
@@ -198,7 +209,7 @@ module Werewolf
         location: @location,
         hasStarted: @hasStarted,
         hasFinished: @hasFinished,
-        villigeWins: @villigeWins
+        villageWins: @villageWins
       }
     end
     def to_json(*options)
@@ -215,7 +226,7 @@ module Werewolf
       game.location=@location
       game.hasStarted=@hasStarted
       game.hasFinished=@hasFinished
-      game.villigeWins=@villigeWins
+      game.villageWins=@villageWins
       game
     end
     class Location
@@ -227,6 +238,9 @@ module Werewolf
       def exist?
         return day >= 0
       end
+      def to_s
+        "Day:#{day} isNight:#{isNight}"
+      end
       def ==(other)
         self.day == other.day
         self.isNight == other.isNight
@@ -236,7 +250,7 @@ module Werewolf
       end
       def as_json(options={})
         {
-          day: @day,
+          day: @day.to_i,
           isNight: @isNight,
         }
       end
@@ -256,6 +270,9 @@ module Werewolf
         @isWerewolf=params.fetch(:isWerewolf,false)
         @isActive=params.fetch(:isActive,false)
         @vote=params.fetch(:vote, nil)
+      end
+      def resetVote
+        @vote=nil
       end
       def exist?
         !name.empty?
@@ -309,7 +326,7 @@ module Werewolf
     map_attr :location
     boolean_attr :hasStarted
     boolean_attr :hasFinished
-    boolean_attr :villigeWins
+    boolean_attr :villageWins
   end
 
 

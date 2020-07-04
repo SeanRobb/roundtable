@@ -3,6 +3,8 @@
 1. cd werewolf-ui
 ### To Develop Locally
 1. yarn start
+### To Deploy to AWS
+1. yarn build && yarn deploy
 ## Werewolf API
 1. cd werewolf-api
 ### To Deploy locally

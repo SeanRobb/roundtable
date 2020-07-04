@@ -1,31 +1,31 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './votePopup.module.css';
-import Dialog from '@material-ui/core/Dialog';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContentText from '@material-ui/core/DialogContentText';
+import {Dialog, DialogTitle, Box, Button, Grid} from '@material-ui/core';
 
 const VotePopup = (props) => (
-  <Dialog className={styles.rolePopup} data-testid="rolePopup"
-  open={props.open}
-  onClose={props.onClose}
->
-  <Box className='popup\_inner'>  
-    <DialogTitle>
-      Vote
-    </DialogTitle>
-    <ButtonGroup
-        style={{padding:"15px"}}
-        orientation="vertical"
-        color="primary"
-        aria-label="vertical outlined primary button group"
-      >
-        {props.ballot.map((person) => <Button key={person} onClick={()=>props.onVote(person)}>{person}</Button>)}
-      </ButtonGroup>
-  </Box>  
+  <Dialog data-testid="votePopup"
+    open={props.open}
+    onClose={props.onClose}
+    className={styles.VotePopup} 
+  >
+  <Grid container direction='column' justify='center' alignItems='stretch'>
+    <Grid item>
+      <DialogTitle>
+        Ballot
+      </DialogTitle>
+    </Grid>
+    {props.ballot?props.ballot
+      .map((person) =>
+      <Grid item key={person}>
+        <Button 
+          variant="contained" color="primary"
+            style={{margin:'10px'}} size="large" onClick={()=>props.onVote(person)}>
+          {person}
+        </Button>
+      </Grid>
+        ):''}
+  </Grid>
 </Dialog>
 );
 

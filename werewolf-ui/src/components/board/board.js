@@ -6,11 +6,9 @@ import {
 import ReactPolling from 'react-polling';
 import WaitingRoom from '../waitingRoom/waitingRoom';
 import Playroom from '../playroom/playroom';
-import {getHeaders} from '../../utils/index';
-import AppBar from '@material-ui/core/AppBar';  
-import Toolbar from '@material-ui/core/Toolbar';  
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+import GameOverRoom from '../gameOverRoom/gameOverRoom';
+import {getHeaders, getUsername} from '../../utils/index';
+import {AppBar, Toolbar,Typography,Avatar } from '@material-ui/core';  
 
 
 const Board = () => {
@@ -22,7 +20,7 @@ const Board = () => {
 
   const [state, setState] = useState({
     game:{
-      id: game,
+      id: game.toUpperCase(),
       created: null,
       roster: [],
       location: { day: 0, time: 'night' },
@@ -37,7 +35,7 @@ const Board = () => {
   return (
   <div className={styles.board} data-testid="board">
     <ReactPolling
-      url={process.env.REACT_APP_API_URL + '/gameroom/' + game }
+      url={process.env.REACT_APP_API_URL + '/gameroom/' + game.toUpperCase() }
       headers={getHeaders()}
       interval= {3000} // in milliseconds(ms)
       retryCount={3} // this is optional
@@ -54,19 +52,14 @@ const Board = () => {
       render={({ startPolling, stopPolling, isPolling }) => {
         return (
           <div>
-            <AppBar position="static">  
-              <Toolbar>
-                <Typography variant="h6">
-                  Werewolf  
-                </Typography>  
-              </Toolbar>  
-            </AppBar> 
+
             <div> 
-              {!state.game.hasStarted?
-              <WaitingRoom state={state.game}></WaitingRoom>
-              :<Playroom state={state}></Playroom>}
+              {state.game.hasStarted?
+                state.game.hasFinished?
+                <GameOverRoom game={state.game} />:
+                  <Playroom state={state} />:
+                <WaitingRoom state={state.game}/>}
             </div>
-            {/* {JSON.stringify(state)} */}
           </div>
         );
       }}
