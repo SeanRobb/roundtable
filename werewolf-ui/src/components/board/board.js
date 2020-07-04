@@ -7,8 +7,8 @@ import ReactPolling from 'react-polling';
 import WaitingRoom from '../waitingRoom/waitingRoom';
 import Playroom from '../playroom/playroom';
 import GameOverRoom from '../gameOverRoom/gameOverRoom';
-import {getHeaders, getUsername} from '../../utils/index';
-import {AppBar, Toolbar,Typography,Avatar } from '@material-ui/core';  
+import {getHeaders} from '../../utils/index';
+import { config } from '../../utils/constants'
 
 
 const Board = () => {
@@ -35,7 +35,7 @@ const Board = () => {
   return (
   <div className={styles.board} data-testid="board">
     <ReactPolling
-      url={process.env.REACT_APP_API_URL + '/gameroom/' + game.toUpperCase() }
+      url={config.url.API_URL + '/gameroom/' + game.toUpperCase() }
       headers={getHeaders()}
       interval= {3000} // in milliseconds(ms)
       retryCount={3} // this is optional

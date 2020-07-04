@@ -1,8 +1,5 @@
 import jwt from 'jwt-decode';
-
-const getURL=() =>{
-  return process.env.REACT_APP_API_URL;
-}
+import { config } from './constants'
 
 const registerUser = (gameId,userId) =>{
   const requestOptions = {
@@ -13,7 +10,7 @@ const registerUser = (gameId,userId) =>{
     })
   };
 
-  return fetch(getURL()+'/gameroom/' + gameId + '/register',requestOptions)
+  return fetch(config.url.API_URL+'/gameroom/' + gameId + '/register',requestOptions)
     .then((res) => res.json())
     .then((data)=>{
       localStorage.setItem('token', data.bearer);
@@ -27,7 +24,7 @@ const changeTimeOfDay = (gameId,timeOfDay) =>{
     headers: getHeaders()
   };
 
-  return fetch(getURL()+'/gameroom/' + gameId + '/' + timeOfDay,requestOptions)
+  return fetch(config.url.API_URL+'/gameroom/' + gameId + '/' + timeOfDay,requestOptions)
     .then((res) => res.json());
 };
 
@@ -40,7 +37,7 @@ const vote = (gameId,voteFor) =>{
     })
   };
 
-  return fetch(getURL()+'/gameroom/' + gameId + '/vote',requestOptions)
+  return fetch(config.url.API_URL+'/gameroom/' + gameId + '/vote',requestOptions)
     .then((res) => res.json());
 };
 
@@ -50,7 +47,7 @@ const startGame = (gameId) =>{
     headers: getHeaders(),
   };
 
-  return fetch(getURL()+'/gameroom/' + gameId + '/start',requestOptions)
+  return fetch(config.url.API_URL+'/gameroom/' + gameId + '/start',requestOptions)
     .then((res) => res.json());
 };
 
@@ -60,7 +57,7 @@ const createGameRoom = () => {
     headers: { 'Content-Type': 'application/json' },
   };
 
-  return fetch(getURL()+ '/gameroom',requestOptions)
+  return fetch(config.url.API_URL+ '/gameroom',requestOptions)
     .then((res) => res.json());
 };
 
