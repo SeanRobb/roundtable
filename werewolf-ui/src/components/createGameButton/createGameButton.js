@@ -12,7 +12,7 @@ const CreateGameButton = () => {
   return (
   <Button color="primary" className={styles.createGameButton} data-testid="createGameButton"
    onClick={() => {
-    createGameRoom().then((data)=>{console.log(data); return data;}).then((data) => history.push('/' + data.id + '/board'));
+    createGameRoom().then((data) => history.push('/' + data.id + '/board'));
   }}>Create Werewolf Game Room</Button>
 )};
 

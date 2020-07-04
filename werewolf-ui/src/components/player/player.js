@@ -7,7 +7,7 @@ import LocalLibraryIcon from '@material-ui/icons/LocalLibrary';
 
 const Player = (props) => (
   <Container>
-    <Grid container direction='column' justify='center' alignItems='center'>
+    <Grid container direction={props.direction} justify='center' alignItems='center'>
       <Grid item>
         {props.isNarrator?<LocalLibraryIcon/>:<PersonIcon />}
       </Grid>
@@ -21,6 +21,7 @@ const Player = (props) => (
 Player.propTypes = {};
 
 Player.defaultProps = {
+  direction:'column',
   isNarrator:false,
   name:'',
 };

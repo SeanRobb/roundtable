@@ -9,7 +9,7 @@ const VotePopup = (props) => (
     onClose={props.onClose}
     className={styles.VotePopup} 
   >
-  <Grid container direction='column' justify='center' alignItems='stretch'>
+  <Grid container direction='column' justify='center' alignItems='center'>
     <Grid item>
       <DialogTitle>
         Ballot

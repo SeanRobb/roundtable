@@ -16,7 +16,6 @@ function Register(props){
   const history = useHistory();
 
   function handleSubmit() {
-    props.setUserName(name);
     registerUser(gameId.toUpperCase(),name)
       .then(() => {
         history.push('/' + gameId.toUpperCase() + '/board');

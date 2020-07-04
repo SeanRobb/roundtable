@@ -5,7 +5,6 @@ const getURL=() =>{
 }
 
 const registerUser = (gameId,userId) =>{
-  console.log(userId +" " +gameId)
   const requestOptions = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

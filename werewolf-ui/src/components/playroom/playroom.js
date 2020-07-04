@@ -1,4 +1,5 @@
 import React, { useState }  from 'react';
+import { useHistory } from "react-router-dom";
 import PropTypes from 'prop-types';
 import styles from './playroom.module.css';
 import RolePopup from '../rolePopup/rolePopup';
@@ -11,13 +12,16 @@ import Fab from '@material-ui/core/Fab';
 import HowToVoteIcon from '@material-ui/icons/HowToVote';
 import PersonIcon from '@material-ui/icons/Person';
 import {vote, changeTimeOfDay} from '../../utils/index';
-import { Typography, Box, Avatar, Card, Grid, Paper, Container } from '@material-ui/core';
+import { Typography, Grid, Paper, Container } from '@material-ui/core';
 import Brightness3Icon from '@material-ui/icons/Brightness3';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import LocalLibraryIcon from '@material-ui/icons/LocalLibrary';
+import * as R from 'ramda';
 
 
 const Playroom = (props) => {
-  //TODO updates to props.state do not propagate
+  const history = useHistory();
   const [state, setState] = useState({showRolePopUp:false, showVotePopUp:false, showDeactivatedPopup:false});
   const [deactivatedPlayer, setDeactivatedPlayer] = useState();
 
@@ -37,7 +41,6 @@ const Playroom = (props) => {
   }; 
 
   function submitTimeOfDayChange() {  
-    console.log("Change Time of Day");
     setState({
       ...state,
       showDeactivatedPopup: true
@@ -150,16 +153,25 @@ const Playroom = (props) => {
       player={deactivatedPlayer}
     />  
 
-    <Grid container spacing={2} justify='flex-end' alignItems='flex-end' style={{position: 'fixed', bottom: '7px'}}>
-      <Grid item>
-        {props.state.role.name === 'Narrator'?
-          <Fab variant="extended" onClick={submitTimeOfDayChange}>{props.state.game.location.isNight?<div><Brightness7Icon/>Wake Up</div>:<div><Brightness3Icon />Go To Sleep</div>}</Fab>
-          :<Fab variant="extended" onClick={toggleVotePopup} disabled={props.state.role.ballot?props.state.role.ballot.length <= 0:true}><div><HowToVoteIcon/> Vote</div></Fab>
-          }   
-      </Grid>
-      <Grid item>
-        <Fab variant="extended" onClick={toggleRolePopup} ><div><PersonIcon/> Role</div></Fab>    
-      </Grid>
+    <Grid container spacing={2} direction='row-reverse' justify='space-between' alignItems='flex-end' style={{position: 'fixed', bottom: '7px'}}>
+      {R.isEmpty(props.state.role)?
+        <Grid item>
+          <Fab variant="extended" onClick={()=>{
+            history.push('/register?game='+ props.state.game.id)
+          }} ><><PersonAddIcon/> Register</></Fab>    
+        </Grid>:
+          <>
+            <Grid item>
+              <Fab variant="extended" onClick={toggleRolePopup} ><>{props.state.role.player.isNarrator?<LocalLibraryIcon/>:<PersonIcon />}{props.state.role.player.name}</></Fab>    
+            </Grid>
+            <Grid item>
+              {props.state.role.name === 'Narrator'?
+                <Fab variant="extended" onClick={submitTimeOfDayChange}>{props.state.game.location.isNight?<><Brightness7Icon/>Wake Up</>:<><Brightness3Icon />Go To Sleep</>}</Fab>
+                :<Fab variant="extended" onClick={toggleVotePopup} disabled={props.state.role.ballot?props.state.role.ballot.length <= 0:true}><><HowToVoteIcon/>Vote</></Fab>
+                }   
+            </Grid>
+          </>  
+      }
     </Grid>
   </div>
 )};

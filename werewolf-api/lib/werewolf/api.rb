@@ -121,6 +121,7 @@ module Werewolf
       player = @roster.find {|player| player.name == playerName}
       return {} unless player
       role ={
+        player: player,
         name:"",
         description:"",
         isActive: player.isActive,

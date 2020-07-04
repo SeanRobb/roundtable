@@ -2,7 +2,9 @@ import React, { useState }  from 'react';
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  Link,
+  NavLink
 } from "react-router-dom";
 import Home from '../home/home';
 import Register from '../register/register';
@@ -13,7 +15,6 @@ import Player from '../player/player';
 import {AppBar, Toolbar,Typography,Avatar, Button, Grid } from '@material-ui/core';  
 
 function App() {
-  const [userName, setUserName] = useState(getUsername());
 
   return (
     <div>
@@ -22,12 +23,12 @@ function App() {
         <Toolbar>
           <Grid container  justify='space-between'>
             <Grid item>
-              <Typography variant="h6">Round Table Games</Typography>  
+              <Link style={{ color: 'inherit', textDecoration: 'inherit'}} to="/"><Typography variant="h6">Round Table Games</Typography></Link>
             </Grid>
             <Grid item>
               <Grid container>
                 <Grid item>
-                <Typography variant='h6'>{userName}</Typography> 
+                {/* <Typography variant='h6'>{userName}</Typography>  */}
                 </Grid>
               </Grid>
             </Grid>
@@ -39,9 +40,7 @@ function App() {
               renders the first one that matches the current URL. */}
           <Switch>
             <Route path="/:game/board" component={Board} />
-            <Route path="/register" render={props => 
-              (<Register {...props} setUserName={setUserName} userName={userName}/>)
-              } />
+            <Route path="/register" component={Register} />
             <Route path="/finish" component={Finish} />
             <Route path="/" component={Home} />
           </Switch>
