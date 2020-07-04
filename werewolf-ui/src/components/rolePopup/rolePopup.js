@@ -5,20 +5,22 @@ import Dialog from '@material-ui/core/Dialog';
 import Box from '@material-ui/core/Box';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import * as R from 'ramda';
 
-const RolePopup = (props) => (
-<Dialog className={styles.rolePopup} data-testid="rolePopup"
-  open={props.open}
-  onClose={props.onClose}
->
-  <Box className='popup\_inner'>  
-    <DialogTitle>
-      {props.role.name}
-    </DialogTitle>
-    <DialogContentText style={{padding:'15px'}}>{props.role.description}</DialogContentText>
-  </Box>  
-</Dialog>
-);
+const RolePopup = (props) => {
+  return (
+    <Dialog className={styles.rolePopup} data-testid="rolePopup"
+      open={props.open}
+      onClose={props.onClose}
+    >
+      <Box className='popup\_inner'>  
+        <DialogTitle>
+          {props.role.name}
+        </DialogTitle>
+        <DialogContentText style={{padding:'15px'}}>{props.role.description}</DialogContentText>
+      </Box>  
+    </Dialog>
+)};
 
 RolePopup.propTypes = {};
 

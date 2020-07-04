@@ -12,7 +12,7 @@ import Fab from '@material-ui/core/Fab';
 import HowToVoteIcon from '@material-ui/icons/HowToVote';
 import PersonIcon from '@material-ui/icons/Person';
 import {vote, changeTimeOfDay} from '../../utils/index';
-import { Typography, Grid, Paper, Container } from '@material-ui/core';
+import { Typography, Grid, Paper, Container, Button } from '@material-ui/core';
 import Brightness3Icon from '@material-ui/icons/Brightness3';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
@@ -22,7 +22,7 @@ import * as R from 'ramda';
 
 const Playroom = (props) => {
   const history = useHistory();
-  const [state, setState] = useState({showRolePopUp:false, showVotePopUp:false, showDeactivatedPopup:false});
+  const [state, setState] = useState({showRolePopUp:!R.isEmpty(props.state.role), showVotePopUp:false, showDeactivatedPopup:false});
   const [deactivatedPlayer, setDeactivatedPlayer] = useState();
 
   function toggleRolePopup() {  
@@ -79,18 +79,31 @@ const Playroom = (props) => {
     {/* Roster Breakdown Start */}
       <Grid item>
         <Paper style={{height:'100%', padding:'5px'}} elevation={1}>
-          <Grid container spacing={2} 
-            direction="column"
-            alignItems="center"
-            justify="center"
-            style={{height:'100%', paddingLeft:'24px', paddingRight:'24px'}}>
-            <Grid item>
-              <Typography variant="h5">Narrator:</Typography>
+          <Container style={{height:'100%', paddingLeft:'24px', paddingRight:'24px'}}>
+            <Grid container
+              alignItems="center"
+              justify="center"
+              style={{height:'100%'}}>
+              <Grid item>
+                <Grid container spacing={2} 
+                  direction="column"
+                  alignItems="center"
+                  justify="stretch"
+                  >
+                  <Grid item>
+                    <Typography variant="h5">Narrator:</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Player isNarrator={true} name={props.state.game.roster.find((player)=>player.isNarrator).name} />
+                  </Grid>
+                  <Grid item>
+                    <Typography variant='body2'>Roomcode: {props.state.game.id}</Typography>
+                  </Grid>
+                </Grid> 
+              </Grid>
             </Grid>
-            <Grid item>
-              <Player isNarrator={true} name={props.state.game.roster.find((player)=>player.isNarrator).name} />
-            </Grid>
-          </Grid> 
+
+          </Container>
         </Paper>
       </Grid>
       <Grid item>
