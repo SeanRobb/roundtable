@@ -9,10 +9,10 @@ const GameOverRoom = (props) => (
     <Paper elevation={1}>
       <Grid container direction="column" alignItems="center" justify="center">
         <Grid item>
-          <Typography variant='h1'>{props.game.villageWins?"Village Wins":"Werewolves Win"}</Typography>
+          <Typography align='center' variant='h3'>{props.game.villageWins?"Village Wins":"Werewolves Win"}</Typography>
         </Grid>
         <Grid item>
-          <Typography variant='h3'>Want to start a new game?</Typography>
+          <Typography align='center' variant='h5'>Want to start a new game?</Typography>
         </Grid>
         <Grid item>
           <CreateGameButton />

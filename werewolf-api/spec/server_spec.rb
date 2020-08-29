@@ -10,9 +10,9 @@ RSpec.describe WerewolfAPI do
     before do
       @token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IlNlYW4iLCJpYXQiOjE1OTMyOTI0NjZ9.uFEUKXW6rUowmNH03DZHrCL39bJ9oI4E_CT8lyeX8rQ"
       @player = Werewolf::Gameroom::Player.new(name:"Sean")
-      @player.isActive = true
+      @player.activate
       @player2 = Werewolf::Gameroom::Player.new(name:"Lauren")
-      @player2.isActive = true
+      @player2.activate
       @votes={@player.name => [@player2.name]}
       @stubGameroom = object_double(Werewolf::Gameroom.new, :addPlayer => [],
         :id => "SWSG", :submitVote => true, :start => true, :sendToDay => true,
