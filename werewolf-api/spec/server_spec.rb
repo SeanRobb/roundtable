@@ -94,7 +94,7 @@ RSpec.describe WerewolfAPI do
         }
         it "returns gameroom" do
           expect(response.status).to eq 200
-          expect(response.body).to eq(@stubGameroom.to_json)
+          expect(response.body).to eq({game:@stubGameroom, deactivatedPlayer:true}.to_json)
         end
       end
       context "Send to day" do
@@ -104,7 +104,7 @@ RSpec.describe WerewolfAPI do
         }
         it "returns gameroom" do
           expect(response.status).to eq 200
-          expect(response.body).to eq(@stubGameroom.to_json)
+          expect(response.body).to eq({game:@stubGameroom, deactivatedPlayer:true}.to_json)
         end
       end
     end

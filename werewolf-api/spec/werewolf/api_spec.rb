@@ -254,11 +254,12 @@ RSpec.describe Werewolf do
 
           tally = @werewolfGame.getVotes
           @werewolfGame.activePlayers.each_with_index {|activePlayer, index| 
-          voteFor = @werewolfGame.activePlayers[index-1] if index>0
-          voteFor = @werewolfGame.activePlayers[index+1] if index==0
-          expect(tally[voteFor.name].length).to eq(2) if index == 0 || index == 2
-          expect(tally[voteFor.name].length).to eq(1) if index > 2  || index == 1
-        }
+            voteFor = @werewolfGame.activePlayers[index-1] if index>0
+            voteFor = @werewolfGame.activePlayers[index+1] if index==0
+            expect(tally[:votes][voteFor.name].length).to eq(2) if index == 0 || index == 2
+            expect(tally[:votes][voteFor.name].length).to eq(1) if index > 2  || index == 1
+          }
+          expect(tally[:needs]).to eq((@werewolfGame.activePlayers.length/2).floor + 1)
         end
 
         it "Game Room can retrieve tally for day" do
@@ -268,7 +269,7 @@ RSpec.describe Werewolf do
           }
 
           tally = @werewolfGame.getVotes
-          expect(tally[@werewolfGame.activeVillagers[0].name].length).to eq(1)
+          expect(tally[:votes][@werewolfGame.activeVillagers[0].name].length).to eq(1)
         end
       end
       describe "Roles can be retrieved" do
@@ -277,9 +278,14 @@ RSpec.describe Werewolf do
           @werewolfGame.sendToDay(@werewolfGame.narrator.name)
           role = @werewolfGame.getRole(villager.name)
           expect(role[:name]).to eq("Villager") 
-          expect(role[:description]).to eq("Villagers are working hard to settle their new town." +
-          " There is wearwolves in the town and during the day the villager vote to hang" +
-          " who they believe is a werewolf. Votes during the day will be decided in a Majority") 
+          expect(role[:description]).to eq(
+            "Villagers work hard to settle their new town. Hidden amonst this group of villagers their are werewolves."+
+        " For the success of the town it is critical to remove all of the werewolves. Every night the werewolves hunt villagers and "+
+        "every day the villagers vote who they believe is a werewolf. The vote is based on a majority. If the villagers successfully "+
+        "vote for a werewolf then that werewolf will be removed from the village never to return. It is a race against time, will the "+
+        "villagers find and remove all of the werewolves before the werewolves attack all of the villagers? Do your best to decide who "+
+        "you can trust."
+          ) 
           validBallot = @werewolfGame.roster.select {|player| (player.isActive && player.name != villager.name)}.map {|player| player.name}
           expect(role[:ballot]).to eq(validBallot) 
           expect(role[:isActive]).to be_truthy
@@ -289,9 +295,14 @@ RSpec.describe Werewolf do
           @werewolfGame.sendToNight(@werewolfGame.narrator.name)
           role = @werewolfGame.getRole(villager.name)
           expect(role[:name]).to eq("Villager") 
-          expect(role[:description]).to eq("Villagers are working hard to settle their new town." +
-          " There is wearwolves in the town and during the day the villager vote to hang" +
-          " who they believe is a werewolf. Votes during the day will be decided in a Majority") 
+          expect(role[:description]).to eq(
+            "Villagers work hard to settle their new town. Hidden amonst this group of villagers their are werewolves."+
+        " For the success of the town it is critical to remove all of the werewolves. Every night the werewolves hunt villagers and "+
+        "every day the villagers vote who they believe is a werewolf. The vote is based on a majority. If the villagers successfully "+
+        "vote for a werewolf then that werewolf will be removed from the village never to return. It is a race against time, will the "+
+        "villagers find and remove all of the werewolves before the werewolves attack all of the villagers? Do your best to decide who "+
+        "you can trust."
+          ) 
           expect(role[:ballot]).to eq([]) 
           expect(role[:isActive]).to be_truthy
         end
@@ -372,13 +383,13 @@ RSpec.describe Werewolf do
         it "Find Werewolf Day 1" do
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
         it "Find Werewolf Day 2" do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
       end
       describe "Werewolves Win" do
@@ -391,7 +402,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
       end
     end
@@ -428,14 +439,14 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame,true)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
         it "Find Werewolf Day 1 & 3" do
           simulateDay(@werewolfGame,true)
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
         it "Find Werewolf Day 1 & 4" do
           simulateDay(@werewolfGame,true)
@@ -443,14 +454,14 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
         it "Find Werewolf Day 2 & 3" do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame,true)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
         it "Find Werewolf Day 2 & 4" do
           simulateDay(@werewolfGame)
@@ -458,7 +469,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
         it "Find Werewolf Day 3 & 4" do
           simulateDay(@werewolfGame)
@@ -466,7 +477,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame,true)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
         it "Find Werewolf Day 3 & 4" do
           simulateDay(@werewolfGame)
@@ -474,7 +485,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame,true)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
       end
       describe "Werewolves Win" do
@@ -488,7 +499,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 1" do
           simulateDay(@werewolfGame, true)
@@ -497,7 +508,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 2" do
           simulateDay(@werewolfGame)
@@ -506,7 +517,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 3" do
           simulateDay(@werewolfGame)
@@ -515,7 +526,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 4" do
           simulateDay(@werewolfGame)
@@ -524,7 +535,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame, true)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
       end
     end
@@ -562,7 +573,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame,true)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
         it "Find Werewolf Day 1 & 3 & 4" do
           simulateDay(@werewolfGame,true)
@@ -571,7 +582,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
 
         it "Find Werewolf Day 1 & 3 & 6" do
@@ -582,7 +593,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
 
         it "Find Werewolf Day 4 & 5 & 6 " do
@@ -593,7 +604,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame,true)
           simulateDay(@werewolfGame,true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(true)
+          expect(@werewolfGame.villageWins).to eq(true)
         end
       end
       describe "Werewolves Win" do
@@ -609,7 +620,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 1" do
           simulateDay(@werewolfGame, true)
@@ -620,7 +631,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 2" do
           simulateDay(@werewolfGame)
@@ -631,7 +642,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 3" do
           simulateDay(@werewolfGame)
@@ -642,7 +653,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 4" do
           simulateDay(@werewolfGame)
@@ -653,7 +664,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 5" do
           simulateDay(@werewolfGame)
@@ -664,7 +675,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 6" do
           simulateDay(@werewolfGame)
@@ -675,7 +686,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame, true)
           simulateDay(@werewolfGame)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 6 & 7" do
           simulateDay(@werewolfGame)
@@ -686,7 +697,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame, true)
           simulateDay(@werewolfGame, true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
         it "Werewolf Found Day 5 & 7" do
           simulateDay(@werewolfGame)
@@ -697,7 +708,7 @@ RSpec.describe Werewolf do
           simulateDay(@werewolfGame)
           simulateDay(@werewolfGame, true)
           expect(@werewolfGame.hasFinished).to eq(true)
-          expect(@werewolfGame.villigeWins).to eq(false)
+          expect(@werewolfGame.villageWins).to eq(false)
         end
       end
     end
