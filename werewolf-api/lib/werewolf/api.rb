@@ -183,6 +183,19 @@ module Werewolf
       @villageWins = false if activeVillagers.length == 0 
       @hasFinished
     end
+    def votesNeeded
+      if @location.isNight then
+        activeWerewolves.length 
+      else
+        (activePlayers.length/2).floor + 1
+      end
+    end
+    def gameOver?
+      @hasFinished = true if activeWerewolves.length == 0 or activeVillagers.length == 0
+      @villageWins = true if activeWerewolves.length == 0 
+      @villageWins = false if activeVillagers.length == 0 
+      @hasFinished
+    end
     def to_s
       "Id: #{id} Roster: #{roster} V Wins: #{villageWins}"
     end
