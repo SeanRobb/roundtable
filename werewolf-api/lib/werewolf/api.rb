@@ -11,6 +11,7 @@ module Werewolf
         player = Player.from_json(player) unless player.is_a? (Player)
         player
       }
+      # TODO clarify parsing of object
       @location = params.fetch(:location, Location.new())
       @location = Location.from_json(@location) unless @location.is_a? (Location)
       @hasStarted = params.fetch(:hasStarted, false)
@@ -25,88 +26,68 @@ module Werewolf
       roster.push(player)
     end
     def start()
+      # Validate a game can start
       raise 'Game has already started' if hasStarted
       raise 'Not enough players' if roster.length < 7
-      @location = Location.new() unless location == Location.new()
 
-      newlyActivePlayers = roster.select { |player| !player.isNarrator } 
-      .map {|player| 
-        player.isActive = true
-        player
-      }
+      @location = Location.new()
 
-      narrator.isActive = false
+      roster.each(&:activate)
+      narrator.deactivate
 
-      targetWerewolves = 1
-      targetWerewolves = 2 if newlyActivePlayers.length > 8 and newlyActivePlayers.length < 12
-      targetWerewolves = 3 if newlyActivePlayers.length > 11 
-
-      until activeWerewolves.length >= targetWerewolves do
-        newlyActivePlayers[rand(newlyActivePlayers.length-1)].isWerewolf = true
+      case activePlayers.length
+        when 0...9 
+          targetWerewolves = 1
+        when 9...12
+          targetWerewolves = 2
+        else
+          targetWerewolves = 3
       end
+
+      createNewWerewolf until activeWerewolves.length >= targetWerewolves 
 
       @hasStarted = true
     end
+
+    def createNewWerewolf
+      potentialWerewolves = @roster.reject { |player| player.isNarrator or player.isWerewolf } 
+      potentialWerewolves[rand(potentialWerewolves.length-1)].isWerewolf = true
+    end
+
     def sendToDay(callerName)
       raise "Only narrator can change day" unless callerName == narrator.name
-      return nil if @location.isNight == false
-      @location.isNight = false
+      return nil unless @location.isNight
 
-      @location.day += 1
+      #  Tally up votes
+      playerToDeactivate = activeWerewolves.group_by(&:vote).find {|player,value| value.length >= votesNeeded}
 
-      tally = Hash.new(0)
-      activeWerewolves.map{|player| player.vote}.each {|vote| 
-        tally[vote]+=1 unless vote.nil?
-        vote = nil
-      }
-      playerToDeactivate = tally.find {|player, value| value >= activeWerewolves.length}
+      player = roster.find { |player| player.name == playerToDeactivate.first} unless playerToDeactivate.nil?
+      
+      player.deactivate unless player.nil?
 
-      activeWerewolves.each { |player|
-        player.resetVote
-      }
-      # No Player has enough votes to be deactivated
-      return nil if playerToDeactivate.nil?
-
-      player= roster.find { |player| player.name == playerToDeactivate.first}
-
-      return nil if player.nil?
-
-      player.isActive = false
-
-      @hasFinished = true if activeVillagers.length == 0
-      @villageWins = false if activeVillagers.length == 0 
+      gameOver?
+      
+      # Prep for Day 
+      activeWerewolves.each(&:resetVote)      
+      @location.increment 
 
       player
     end
     def sendToNight(callerName)
       raise "Only narrator can change day" unless callerName == narrator.name
-      return nil if @location.isNight == true
-      @location.isNight = true
+      return nil if @location.isNight
 
-      tally = Hash.new(0)
-      activePlayers.map{|player| player.vote}.each {|vote| 
-        tally[vote]+=1 unless vote.nil?
-      }
-      majorityNeeded = (activePlayers.length/2).floor
-      playerToDeactivate = tally.find {|player, value| value > majorityNeeded}
+      #  Tally up votes
+      playerToDeactivate = activePlayers.group_by(&:vote).find {|player,value| value.length >= votesNeeded}
 
-      activePlayers.each { |player|
-        player.resetVote
-      }
-      # No Player has enough votes to be deactivated
-      return nil if playerToDeactivate.nil?
+      player = roster.find { |player| player.name == playerToDeactivate.first} unless playerToDeactivate.nil?
+      player.deactivate unless player.nil?
 
-      player= roster.find { |player| player.name == playerToDeactivate.first}
+      gameOver?
 
-      # No Player has enough votes to be deactivated
-      return nil if player.nil?
-
-      player.isActive = false
-
-
-      @hasFinished = true if activeWerewolves.length == 0 or activeVillagers.length == 0
-      @villageWins = true if activeWerewolves.length == 0 
-      @villageWins = false if activeVillagers.length == 0 
+      #Prep for Night
+      activePlayers.each(&:resetVote)  
+      @location.increment
 
       player
     end
@@ -162,42 +143,50 @@ module Werewolf
       return role
     end
     def getVotes()
-      tally = Hash.new { |h, k| h[k] = [] }
-      activeWerewolves.each {|player| 
-      tally[player.vote].append(player.name) unless player.vote.empty?
-      } if @location.isNight
-
-      activePlayers.each {|player| 
-        tally[player.vote].append(player.name) unless player.vote.empty?
-      } unless @location.isNight
-
-      needs = activeWerewolves.length if @location.isNight
-      needs = (activePlayers.length/2).floor + 1 unless @location.isNight
+      voters = activePlayers
+      voters = activeWerewolves if @location.isNight
+      
+      newTally = voters.reject{|player| player.vote.empty?}.group_by(&:vote).map {|player,votesFor| 
+        { player=> votesFor.map(&:name) }
+      }.reduce({}, :merge)
 
       {
-        needs: needs,
-        votes: tally
+        needs: votesNeeded,
+        votes: newTally
       }
     end
-    def narrator()
+    def narrator
       return roster.find { |player|
         player.isNarrator
       }
     end
-    def activeWerewolves() 
+    def activeWerewolves 
       return roster.select { |player|
         player.isWerewolf and player.isActive
       }
     end
-    def activeVillagers()
+    def activeVillagers
       return roster.select { |player|
         !player.isWerewolf and player.isActive
       }
     end
-    def activePlayers()
+    def activePlayers
       return roster.select { |player|
         player.isActive
       }
+    end
+    def votesNeeded
+      if @location.isNight then
+        activeWerewolves.length 
+      else
+        (activePlayers.length/2).floor + 1
+      end
+    end
+    def gameOver?
+      @hasFinished = true if activeWerewolves.length == 0 or activeVillagers.length == 0
+      @villageWins = true if activeWerewolves.length == 0 
+      @villageWins = false if activeVillagers.length == 0 
+      @hasFinished
     end
     def to_s
       "Id: #{id} Roster: #{roster} V Wins: #{villageWins}"
@@ -236,6 +225,10 @@ module Werewolf
         @day = params.fetch(:day, params.fetch('day',0))
         @isNight = params.fetch(:isNight, true)
       end
+      def increment
+        @day += 1 if @isNight
+        @isNight = !@isNight
+      end
       def exist?
         return day >= 0
       end
@@ -271,6 +264,12 @@ module Werewolf
         @isWerewolf=params.fetch(:isWerewolf,false)
         @isActive=params.fetch(:isActive,false)
         @vote=params.fetch(:vote, nil)
+      end
+      def activate 
+        @isActive = true
+      end
+      def deactivate
+        @isActive = false
       end
       def resetVote
         @vote=nil

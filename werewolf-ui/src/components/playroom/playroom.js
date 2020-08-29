@@ -79,7 +79,7 @@ const Playroom = (props) => {
     {/* Roster Breakdown Start */}
       <Grid item>
         <Paper style={{height:'100%', padding:'5px'}} elevation={1}>
-          <Container style={{height:'100%', paddingLeft:'24px', paddingRight:'24px'}}>
+          <Container style={{height:'100%', paddingLeft:'20px', paddingRight:'20px'}}>
             <Grid container
               alignItems="center"
               justify="center"
@@ -97,7 +97,10 @@ const Playroom = (props) => {
                     <Player isNarrator={true} name={props.state.game.roster.find((player)=>player.isNarrator).name} />
                   </Grid>
                   <Grid item>
-                    <Typography variant='body2'>Roomcode: {props.state.game.id}</Typography>
+                    <Typography variant='body2'>Roomcode:</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography variant='body2'>{props.state.game.id}</Typography>
                   </Grid>
                 </Grid> 
               </Grid>
