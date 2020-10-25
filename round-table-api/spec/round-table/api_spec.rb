@@ -1,11 +1,11 @@
-RSpec.describe Werewolf do
+RSpec.describe RoundTable do
   it "has a version number" do
-    expect(Werewolf::VERSION).not_to be nil
+    expect(RoundTable::VERSION).not_to be nil
   end
 
   describe "create a gameroom" do
     it "can create a new gameroom" do
-      werewolfGame = Werewolf::Gameroom.new()
+      werewolfGame = RoundTable::WerewolfGameroom.new()
       expect(werewolfGame).to exist
       expect(werewolfGame.id).to satisfy('4 Random Char String') { |id|
         id.length == 4 and id.kind_of? String
@@ -19,13 +19,13 @@ RSpec.describe Werewolf do
     it "can pass in params" do
       id = 'abcd'
       created = Time.now.getutc
-      playerRoster = [Werewolf::Gameroom::Player.new(name:'sean')]
-      location = Werewolf::Gameroom::Location.new()
+      playerRoster = [RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:'sean')]
+      location = RoundTable::WerewolfGameroom::Location.new()
       hasStarted = true
       hasFinished = true
 
 
-      werewolfGame = Werewolf::Gameroom.new(id:id,created:created,
+      werewolfGame = RoundTable::WerewolfGameroom.new(id:id,created:created,
       roster:playerRoster,location:location, hasStarted:hasStarted, hasFinished:hasFinished)
       expect(werewolfGame).to exist
       expect(werewolfGame.id).to eq(id)
@@ -40,7 +40,7 @@ RSpec.describe Werewolf do
   describe "player manipulation" do
     it "can create player with name" do
       name='sean'
-      player = Werewolf::Gameroom::Player.new(name:name)
+      player = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:name)
 
       expect(player).to exist
       expect(player.name).to eq(name)
@@ -51,7 +51,7 @@ RSpec.describe Werewolf do
     end
     it "player names are trimmed when created" do
       name='  se an  '
-      player = Werewolf::Gameroom::Player.new(name:name)
+      player = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:name)
 
       expect(player).to exist
       expect(player.name).to eq('se an')
@@ -61,7 +61,7 @@ RSpec.describe Werewolf do
       expect(player.vote).to be_nil
     end
     it "can not create player without a name" do
-      expect {Werewolf::Gameroom::Player.new()}.to raise_error('Must set name for player')
+      expect {RoundTable::WerewolfGameroom::WerewolfPlayer.new()}.to raise_error('Must set name for player')
     end
     it "can set params when creating player" do
       name='sean'
@@ -69,7 +69,7 @@ RSpec.describe Werewolf do
       isWerewolf=false
       isActive=false
       vote='Lauren'
-      player = Werewolf::Gameroom::Player.new(name:name,isNarrator:isNarrator,isWerewolf:isWerewolf,
+      player = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:name,isNarrator:isNarrator,isWerewolf:isWerewolf,
       isActive:isActive,vote:vote)
       expect(player).to exist
       expect(player.name).to eq(name)
@@ -79,28 +79,28 @@ RSpec.describe Werewolf do
       expect(player.vote).to eq(vote)
     end
     it "can add player to a game" do
-      gameroom = Werewolf::Gameroom.new()
-      player = Werewolf::Gameroom::Player.new(name:'sean')
+      gameroom = RoundTable::WerewolfGameroom.new()
+      player = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:'sean')
       gameroom.addPlayer(player)
       expect(gameroom.roster).to include player
     end
     it "cannot add player to a game with the same name" do
-      gameroom = Werewolf::Gameroom.new()
-      player1 = Werewolf::Gameroom::Player.new(name:'sean')
+      gameroom = RoundTable::WerewolfGameroom.new()
+      player1 = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:'sean')
       gameroom.addPlayer(player1)
 
       expect(gameroom.roster).to include player1
 
-      player2 = Werewolf::Gameroom::Player.new(name:'sean')
+      player2 = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:'sean')
       expect { gameroom.addPlayer(player2)}.to raise_error('Player already exists')
 
-      player3 = Werewolf::Gameroom::Player.new(name:'sEaN')
+      player3 = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:'sEaN')
       expect { gameroom.addPlayer(player3)}.to raise_error('Player already exists')
     end
     it "narrator defaults to the first person in the room" do
-      gameroom = Werewolf::Gameroom.new()
-      player1 = Werewolf::Gameroom::Player.new(name:'sean')
-      player2 = Werewolf::Gameroom::Player.new(name:'test')
+      gameroom = RoundTable::WerewolfGameroom.new()
+      player1 = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:'sean')
+      player2 = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:'test')
       gameroom.addPlayer(player1)
       gameroom.addPlayer(player2)
 
@@ -111,7 +111,7 @@ RSpec.describe Werewolf do
 
     it "cannot add a player after game has started" do
       gameroom = createValidGame()
-      player3 = Werewolf::Gameroom::Player.new(name:'late player')
+      player3 = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:'late player')
       gameroom.start
       expect { gameroom.addPlayer(player3)}.to raise_error('Game has already started')
     end
@@ -134,7 +134,7 @@ RSpec.describe Werewolf do
     end
     it "starts in first night" do
       werewolfGame = createValidGame()
-      werewolfGame.location = Werewolf::Gameroom::Location.new(day:12,isNight:false)
+      werewolfGame.location = RoundTable::WerewolfGameroom::Location.new(day:12,isNight:false)
       werewolfGame.start
       expect(werewolfGame.location.day).to eq(0)
       expect(werewolfGame.location.night?).to be_truthy
@@ -714,12 +714,12 @@ RSpec.describe Werewolf do
     end
   end
 
-  # it "interacts with DB correctly" do
-  #   gameroom = createValidGame()
-  #   gameroom.start
-  #   simulateDay(gameroom)
-  #   Werewolf::WerewolfGameDBService.save gameroom
-  #   room = Werewolf::WerewolfGameDBService.get gameroom.id
-  #   expect(room).to eq(gameroom)
-  # end
+  it "interacts with DB correctly", :database => true do
+    gameroom = createValidGame()
+    gameroom.start
+    simulateDay(gameroom)
+    RoundTable::RoundTableGameDBService.save gameroom
+    room = RoundTable::RoundTableGameDBService.get gameroom.id
+    expect(room).to eq(gameroom)
+  end
 end

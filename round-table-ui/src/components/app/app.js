@@ -25,13 +25,6 @@ function App() {
             <Grid item>
               <Link style={{ color: 'inherit', textDecoration: 'inherit'}} to="/"><Typography variant="h6">Round Table Games</Typography></Link>
             </Grid>
-            <Grid item>
-              <Grid container>
-                <Grid item>
-                {/* <Typography variant='h6'>{userName}</Typography>  */}
-                </Grid>
-              </Grid>
-            </Grid>
           </Grid>
         </Toolbar>  
       </AppBar> 
@@ -41,17 +34,12 @@ function App() {
           <Switch>
             <Route path="/:game/board" component={Board} />
             <Route path="/register" component={Register} />
-            <Route path="/finish" component={Finish} />
             <Route path="/" component={Home} />
           </Switch>
         </div>
       </Router>
     </div>
   );
-}
-
-function Finish() {
-  return <h2>Finish Page</h2>;
 }
 
 export default App;

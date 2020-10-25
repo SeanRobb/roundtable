@@ -2,9 +2,9 @@ require 'faker'
 
 module Helpers
   def createValidGame(playercount = 6)
-    werewolfGame = Werewolf::Gameroom.new()
+    werewolfGame = RoundTable::WerewolfGameroom.new()
     until werewolfGame.roster.length >= playercount+1 do
-      werewolfGame.addPlayer(Werewolf::Gameroom::Player.new(name:Faker::Name.name))
+      werewolfGame.addPlayer(RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:Faker::Name.name))
     end
     werewolfGame
   end

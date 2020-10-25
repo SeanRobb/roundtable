@@ -1,17 +1,17 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "werewolf/api/version"
+require "round-table/api/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "werewolf-api"
-  spec.version       = Werewolf::VERSION
+  spec.name          = "round-table-api"
+  spec.version       = RoundTable::VERSION
   spec.authors       = ["SeanRobb"]
   spec.email         = ["seanpatrickrobb@gmail.com"]
 
   spec.summary       = "This is a game of werewolf that is able to be played through a webpage."
   spec.description   = "Through this game you can have a dashboard view that shows the current state of the world. Also their is the ability to have people get their role card and voting card on thier phone."
-  spec.homepage      = "https://github.com/SeanRobb/werewolf"
+  spec.homepage      = "https://github.com/SeanRobb/round-table"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -20,8 +20,8 @@ Gem::Specification.new do |spec|
     spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
     spec.metadata["homepage_uri"] = spec.homepage
-    spec.metadata["source_code_uri"] = "https://github.com/SeanRobb/werewolf"
-    spec.metadata["changelog_uri"] = "https://github.com/SeanRobb/werewolf"
+    spec.metadata["source_code_uri"] = "https://github.com/SeanRobb/round-table"
+    spec.metadata["changelog_uri"] = "https://github.com/SeanRobb/round-table"
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."

@@ -1,6 +1,6 @@
 const prod = {
   url: {
-   API_URL: 'https://api.werewolf.hoodie.work',
+   API_URL: 'https://api.roundtable.hoodie.work',
   }
  };
 

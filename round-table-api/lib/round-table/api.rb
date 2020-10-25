@@ -1,22 +1,68 @@
 require_relative "./api/version"
 require 'aws-record'
 
-module Werewolf
+module RoundTable
   class Gameroom
-    attr_accessor :id, :created, :roster, :location, :hasStarted, :hasFinished, :villageWins
+    attr_accessor :id, :created, :hasStarted, :hasFinished
     def initialize(params = {})
       @id = params.fetch(:id, (0...4).map { (65 + rand(26)).chr }.join)
       @created = params.fetch(:created, Time.now.getutc)
-      @roster = params.fetch(:roster, []).map { |player| 
-        player = Player.from_json(player) unless player.is_a? (Player)
+      @hasStarted = params.fetch(:hasStarted, false)
+      @hasFinished = params.fetch(:hasFinished, false)
+    end
+    def to_model
+      game = RoundTableGames.new()
+      game.id=@id
+      game.created=@created
+      game.hasStarted=@hasStarted
+      game.hasFinished=@hasFinished
+      game
+    end
+    class Player
+      attr_accessor :name
+      def initialize(params = {}) 
+        raise 'Must set name for player' if params[:name].nil? or params[:name].empty?
+        @name=params.fetch(:name).strip
+        @isActive=params.fetch(:isActive,false)
+      end
+      def active?
+        @isActive
+      end
+      def activate 
+        @isActive = true
+      end
+      def deactivate
+        @isActive = false
+      end
+      def exist?
+        !name.empty?
+      end
+      def ==(other)
+        self.name.downcase == other.name.downcase
+      end
+    end
+  end
+  class WerewolfGameroom < Gameroom
+    attr_accessor :roster, :location, :villageWins
+    def initialize(params = {})
+      super params
+
+      @roster = params.fetch(:roster, [])
+      @location = params.fetch(:location, Location.new())
+      @villageWins = params.fetch(:villageWins, false)
+
+      gameInfo = params.fetch(:gameInfo, {}).transform_keys(&:to_sym)
+
+      @roster=gameInfo[:roster] if gameInfo.has_key? :roster 
+      @location=gameInfo[:location] if gameInfo.has_key? :location 
+      @villageWins=gameInfo[:villageWins] if gameInfo.has_key? :villageWins 
+      
+      @roster = @roster.map { |player| 
+        player = WerewolfPlayer.from_json(player) unless player.is_a? (WerewolfPlayer)
         player
       }
       # TODO clarify parsing of object
-      @location = params.fetch(:location, Location.new())
       @location = Location.from_json(@location) unless @location.is_a? (Location)
-      @hasStarted = params.fetch(:hasStarted, false)
-      @hasFinished = params.fetch(:hasFinished, false)
-      @villageWins = params.fetch(:villageWins, false)
     end
     def addPlayer(player)
       raise 'Player already exists' if roster.include? player
@@ -38,9 +84,9 @@ module Werewolf
       }
 
       case activePlayers.length
-        when 0...9 
+        when 0..8 
           targetWerewolves = 1
-        when 9...12
+        when 9..11
           targetWerewolves = 2
         else
           targetWerewolves = 3
@@ -50,7 +96,6 @@ module Werewolf
 
       @hasStarted = true
     end
-
     def createNewWerewolf
       potentialWerewolves = @roster.reject { |player| player.narrator? or player.werewolf? } 
       potentialWerewolves[rand(potentialWerewolves.length-1)].makeWerewolf
@@ -145,7 +190,7 @@ module Werewolf
 
       return role
     end
-    def getVotes()
+    def getVotes
       voters = activePlayers
       voters = activeWerewolves if @location.night?
       
@@ -183,19 +228,6 @@ module Werewolf
       @villageWins = false if activeVillagers.length == 0 
       @hasFinished
     end
-    def votesNeeded
-      if @location.isNight then
-        activeWerewolves.length 
-      else
-        (activePlayers.length/2).floor + 1
-      end
-    end
-    def gameOver?
-      @hasFinished = true if activeWerewolves.length == 0 or activeVillagers.length == 0
-      @villageWins = true if activeWerewolves.length == 0 
-      @villageWins = false if activeVillagers.length == 0 
-      @hasFinished
-    end
     def to_s
       "Id: #{id} Roster: #{roster} V Wins: #{villageWins}"
     end
@@ -217,16 +249,30 @@ module Werewolf
       return !id.empty?
     end
     def to_model
-      game = WerewolfGames.new()
-      game.id=@id
-      game.created=@created
-      game.roster=@roster
-      game.location=@location
-      game.hasStarted=@hasStarted
-      game.hasFinished=@hasFinished
-      game.villageWins=@villageWins
+      game = super
+      gameInfo = Hash.new
+      gameInfo[:roster]=@roster
+      gameInfo[:location]=@location
+      gameInfo[:villageWins]=@villageWins
+      game.gameInfo = gameInfo
+
       game
     end
+
+    def ==(other)
+      self.id == other.id
+      self.created == other.created
+      self.hasStarted == other.hasStarted
+      self.hasFinished == other.hasFinished
+
+      self.roster == other.roster
+      self.location == other.location
+      self.villageWins == other.villageWins
+    end
+    def hash
+      id.hash
+    end
+
     class Location
       attr_accessor :day
       def initialize(params={})
@@ -246,12 +292,8 @@ module Werewolf
       def to_s
         "Day:#{day} isNight:#{isNight}"
       end
-      def ==(other)
-        self.day == other.day
-        self.night? == other.night?
-      end
       def self.from_json(parsedJSON)
-        Location.new(day: parsedJSON.fetch("day", 0), isNight:parsedJSON.fetch("isNight", true))
+        Location.new(parsedJSON.transform_keys(&:to_sym))
       end
       def as_json(options={})
         {
@@ -265,28 +307,21 @@ module Werewolf
       def to_h(*options)
         {:day=>@day,:isNight=>@isNight}
       end
+      def ==(other)
+        self.day == other.day
+        self.night? == other.night?
+      end
     end
-    class Player
-      # attr_accessor :name, :isNarrator, :isWerewolf, :isActive, :vote
 
-      attr_accessor :name, :vote
+    class WerewolfPlayer < Player
+      attr_accessor :vote
       def initialize(params = {}) 
-        raise 'Must set name for player' if params[:name].nil? or params[:name].empty?
-        @name=params.fetch(:name).strip
+        super params
         @isNarrator=params.fetch(:isNarrator,false)
         @isWerewolf=params.fetch(:isWerewolf,false)
-        @isActive=params.fetch(:isActive,false)
         @vote=params.fetch(:vote, nil)
       end
-      def active?
-        @isActive
-      end
-      def activate 
-        @isActive = true
-      end
-      def deactivate
-        @isActive = false
-      end
+
       def makeWerewolf
         @isWerewolf = true
         @isNarrator = false
@@ -310,13 +345,9 @@ module Werewolf
       def resetVote
         @vote=nil
       end
-      def exist?
-        !name.empty?
-      end
+
       def self.from_json(parsedJSON)
-        Player.new(name: parsedJSON.fetch("name"), 
-        isNarrator:parsedJSON.fetch("isNarrator", false), isWerewolf: parsedJSON.fetch("isWerewolf",false),
-        isActive: parsedJSON.fetch("isActive",false),vote: parsedJSON.fetch("vote",nil))
+        WerewolfPlayer.new(parsedJSON.transform_keys(&:to_sym))
       end
       def to_s
         "#{name} - #{isWerewolf ? "Werewolf": (isNarrator ? "Narrator": "Villager")} - #{isActive ? "Active": "Inactive"} - Voting For: #{vote}"
@@ -346,31 +377,29 @@ module Werewolf
           :vote => hashedVote,
         }
       end
-      def ==(other)
-        self.name.downcase == other.name.downcase
-      end
+
     end
   end
   # Class for DynamoDB table
   # This could also be another file you depend on locally.
-  class WerewolfGames
+  class RoundTableGames
     include Aws::Record
-    set_table_name "WerewolfGames"
+    set_table_name "RoundTableGames"
     string_attr :id, hash_key: true
     datetime_attr :created
-    list_attr  :roster
-    map_attr :location
     boolean_attr :hasStarted
     boolean_attr :hasFinished
-    boolean_attr :villageWins
+
+    map_attr :gameInfo
   end
 
 
-  module WerewolfGameDBService
+  module RoundTableGameDBService
     def self.get(gameroomId)
-      game = Werewolf::WerewolfGames.find(id:gameroomId)
-      raise "Game not found" if game.nil?
-      gameroom=Werewolf::Gameroom.new(game.to_h) unless game.nil?
+      game = RoundTable::RoundTableGames.find(id:gameroomId)
+      return nil if game.nil?
+      puts game.to_h
+      gameroom=RoundTable::WerewolfGameroom.new(game.to_h) unless game.nil?
       gameroom
     end
     def self.save(gameroom)

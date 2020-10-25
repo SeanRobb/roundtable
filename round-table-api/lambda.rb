@@ -19,7 +19,7 @@ require 'base64'
 
 # Global object that responds to the call method. Stay outside of the handler
 # to take advantage of container reuse
-$app ||= Rack::Builder.parse_file("#{__dir__}/lib/werewolf/config.ru").first
+$app ||= Rack::Builder.parse_file("#{__dir__}/lib/round-table/config.ru").first
 ENV['RACK_ENV'] ||= 'production'
 
 

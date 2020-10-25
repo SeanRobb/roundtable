@@ -1,28 +1,28 @@
 require "spec_helper"
 require 'jwt'
 
-RSpec.describe WerewolfAPI do
+RSpec.describe RoundTableAPI do
   include Rack::Test::Methods
   def app 
-     WerewolfAPI
+     RoundTableAPI
   end
-  describe "Game Modification Endpoints" do  
+  describe "Game Modification Endpoints", :api => true do  
     before do
       @token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IlNlYW4iLCJpYXQiOjE1OTMyOTI0NjZ9.uFEUKXW6rUowmNH03DZHrCL39bJ9oI4E_CT8lyeX8rQ"
-      @player = Werewolf::Gameroom::Player.new(name:"Sean")
+      @player = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:"Sean")
       @player.activate
-      @player2 = Werewolf::Gameroom::Player.new(name:"Lauren")
+      @player2 = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:"Lauren")
       @player2.activate
       @votes={@player.name => [@player2.name]}
-      @stubGameroom = object_double(Werewolf::Gameroom.new, :addPlayer => [],
+      @stubGameroom = object_double(RoundTable::WerewolfGameroom.new, :addPlayer => [],
         :id => "SWSG", :submitVote => true, :start => true, :sendToDay => true,
         :sendToNight => true, :roster => [@player,@player2], :getRole => {
           name: "This Is My Role",
           description: "This is my Descripition"
         }, :getVotes => @votes)
-      allow(Werewolf::Gameroom).to receive(:new).and_return(@stubGameroom)
-      allow(Werewolf::WerewolfGameDBService).to receive(:save).with(@stubGameroom)
-      allow(Werewolf::WerewolfGameDBService).to receive(:get).with(@stubGameroom.id).and_return(@stubGameroom)
+      allow(RoundTable::WerewolfGameroom).to receive(:new).and_return(@stubGameroom)
+      allow(RoundTable::RoundTableGameDBService).to receive(:save).with(@stubGameroom)
+      allow(RoundTable::RoundTableGameDBService).to receive(:get).with(@stubGameroom.id).and_return(@stubGameroom)
     end    
 
     describe "Non player specific calls" do  

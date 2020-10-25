@@ -1,6 +1,6 @@
 require "bundler/setup"
-require "werewolf/api"
-require "werewolf/server"
+require "round-table/api"
+require "round-table/server"
 require './spec/helpers'
 require 'rack/test'
 

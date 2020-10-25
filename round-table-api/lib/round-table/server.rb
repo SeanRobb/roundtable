@@ -5,7 +5,7 @@ require 'dotenv/load'
 require_relative "api"
 require 'sinatra/cross_origin'
 
-class WerewolfAPI < Sinatra::Base
+class RoundTableAPI < Sinatra::Base
   
   configure do
     enable :cross_origin
@@ -18,15 +18,18 @@ class WerewolfAPI < Sinatra::Base
 
   # Create Gameroom
   post '/gameroom' do
-    werewolfGame = Werewolf::Gameroom.new
-    Werewolf::WerewolfGameDBService.save werewolfGame 
+    werewolfGame = RoundTable::WerewolfGameroom.new
+    RoundTable::RoundTableGameDBService.save werewolfGame 
     werewolfGame.to_json
   end
 
   # Get Gameroom information
   get '/gameroom/:gameroomid' do |gameroomid|
     auth_token = decodeToken(request)
-    werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid 
+    werewolfGame = RoundTable::RoundTableGameDBService.get gameroomid 
+
+    raise Sinatra::NotFound.new if werewolfGame.nil?
+
     role ={}
     role = werewolfGame.getRole(auth_token["username"]) if (auth_token)
     {
@@ -41,12 +44,15 @@ class WerewolfAPI < Sinatra::Base
     request.body.rewind
     req = request.body.read
     data = JSON.parse req
-    werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid
-    player = Werewolf::Gameroom::Player.new(name:data['username'])
+    werewolfGame = RoundTable::RoundTableGameDBService.get gameroomid
+
+    raise Sinatra::NotFound.new if werewolfGame.nil?
+
+    player = RoundTable::WerewolfGameroom::WerewolfPlayer.new(name:data['username'])
     
     unless werewolfGame.roster.include? player
       werewolfGame.addPlayer(player) 
-      Werewolf::WerewolfGameDBService.save werewolfGame
+      RoundTable::RoundTableGameDBService.save werewolfGame
     end
 
     {
@@ -62,18 +68,24 @@ class WerewolfAPI < Sinatra::Base
     request.body.rewind  # in case someone already read it
     data = JSON.parse request.body.read
 
-    werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid
+    werewolfGame = RoundTable::RoundTableGameDBService.get gameroomid
+
+    raise Sinatra::NotFound.new if werewolfGame.nil?
+
     werewolfGame.submitVote(player:decoded_token["username"], voteFor:data['vote'])
-    Werewolf::WerewolfGameDBService.save werewolfGame
+    RoundTable::RoundTableGameDBService.save werewolfGame
     werewolfGame.to_json
   end
 
   # Start Game in Gameroom
   post '/gameroom/:gameroomid/start' do |gameroomid|
     auth_token = request.env['HTTP_AUTHORIZATION']
-    werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid
+    werewolfGame = RoundTable::RoundTableGameDBService.get gameroomid
+
+    raise Sinatra::NotFound.new if werewolfGame.nil?
+
     werewolfGame.start
-    Werewolf::WerewolfGameDBService.save werewolfGame
+    RoundTable::RoundTableGameDBService.save werewolfGame
     werewolfGame.to_json
   end
 
@@ -81,7 +93,10 @@ class WerewolfAPI < Sinatra::Base
   post '/gameroom/:gameroomid/:timeOfDay' do |gameroomid,timeOfDay|
     decoded_token=decodeToken(request)
 
-    werewolfGame = Werewolf::WerewolfGameDBService.get gameroomid
+    werewolfGame = RoundTable::RoundTableGameDBService.get gameroomid
+
+    raise Sinatra::NotFound.new if werewolfGame.nil?
+    
     if timeOfDay == 'day'
       print "Sending To Day"
       deactivatedPlayer = werewolfGame.sendToDay decoded_token["username"] 
@@ -90,7 +105,7 @@ class WerewolfAPI < Sinatra::Base
       print "Sending to Night"
       deactivatedPlayer = werewolfGame.sendToNight decoded_token["username"]
     end
-    Werewolf::WerewolfGameDBService.save werewolfGame
+    RoundTable::RoundTableGameDBService.save werewolfGame
     
     {
       game: werewolfGame,
@@ -105,6 +120,10 @@ class WerewolfAPI < Sinatra::Base
     response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept, Authorization"
   
     200
+  end
+
+  not_found do
+    'Game was not found'
   end
 
   def encodeToken(params = {})
