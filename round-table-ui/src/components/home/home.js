@@ -27,7 +27,19 @@ return (
                     <Typography variant='h6'>Werewolf</Typography>
                   </Grid>
                   <Grid item>
-                    <CreateGameButton />
+                    <CreateGameButton type="Werewolf" />
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item>
+              <Paper elevation={2} style={{padding:'20px'}}>
+                <Grid container  direction="column" alignItems="center" justify="center">
+                  <Grid item>
+                    <Typography variant='h6'>Next Round</Typography>
+                  </Grid>
+                  <Grid item>
+                    <CreateGameButton type="Next Round" />
                   </Grid>
                 </Grid>
               </Paper>

@@ -8,7 +8,7 @@
 ## Werewolf API
 1. cd werewolf-api
 ### To Deploy locally
-1. rackup lib/werewolf/config.ru
+1. rackup lib/round-table/config.ru
 ### To Deploy to AWS
 1. sam package      --template-file template.yaml      --output-template-file serverless-output.yaml      --s3-bucket werewolf-api
 2. sam deploy      --template-file serverless-output.yaml      --stack-name werewolf-api --capabilities CAPABILITY_IAM
