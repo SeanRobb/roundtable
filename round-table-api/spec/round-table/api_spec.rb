@@ -976,6 +976,21 @@ RSpec.describe RoundTable do
 
         expect(nextRoundGameroom.get_player(player1.name).betsPlaced).to include({id:bet.id,selection:bet.choiceA})
       end
+      it "can allow for players to enter selection on open bets only the latest selection will be saved" do
+        nextRoundGameroom = createNextRoundValidGame 
+        openBetsFromOptions(nextRoundGameroom, 2)
+        
+        player1 = nextRoundGameroom.roster[2]
+        player2 = nextRoundGameroom.roster[4]
+
+        bet = nextRoundGameroom.openBets[1] 
+
+        nextRoundGameroom.place_bet(player1.name,bet.id,bet.choiceA)
+        nextRoundGameroom.place_bet(player1.name,"#{bet.id}",bet.choiceB)
+
+        expect(nextRoundGameroom.get_player(player1.name).betsPlaced).to_not include({id:bet.id,selection:bet.choiceA})
+        expect(nextRoundGameroom.get_player(player1.name).betsPlaced).to include({id:bet.id,selection:bet.choiceB})
+      end
       it "can not allow for non existant players to enter a selection on a open bet" do
         nextRoundGameroom = createNextRoundValidGame 
         openBetsFromOptions(nextRoundGameroom, 2)
@@ -1045,6 +1060,7 @@ RSpec.describe RoundTable do
         leaderboard = nextRoundGameroom.leaderboard
 
         expect(leaderboard[0][:name]).to eq(player1.name)
+        expect(leaderboard[0][:points]).to eq(1)
       end
 
       it "can calculate a leaderboard - 2 bet & 2 player" do

@@ -45,8 +45,16 @@ class RoundTableAPI < Sinatra::Base
       role: role
     }
     if game.type == "Werewolf" then
+      returnObject[:waitingroom] = {
+        :description=> "You need at least 7 players to play",
+        :canStart => game.roster.count > 6
+      }
       returnObject[:results] = game.getVotes 
     elsif game.type == "Next Round" then
+      returnObject[:waitingroom] = {
+        :description => "You need at least 2 players to play",
+        :canStart => game.roster.count > 1
+      }
       returnObject[:leaderboard] = game.leaderboard 
     end
 
@@ -80,7 +88,7 @@ class RoundTableAPI < Sinatra::Base
 
   # Werewolf Specific
   # Submit Vote for Player
-  post '/gameroom/:gameroomid/vote' do |gameroomid|
+  post '/gameroom/:gameroomid/werewolf/vote' do |gameroomid|
     decoded_token=decodeToken(request)
 
     payload = json_params unless empty_body?
@@ -96,17 +104,17 @@ class RoundTableAPI < Sinatra::Base
 
   # Start Game in Gameroom
   post '/gameroom/:gameroomid/start' do |gameroomid|
-    werewolfGame = RoundTable::RoundTableGameDBService.get gameroomid
+    game = RoundTable::RoundTableGameDBService.get gameroomid
 
-    raise Sinatra::NotFound.new if werewolfGame.nil?
+    raise Sinatra::NotFound.new if game.nil?
 
-    werewolfGame.start
-    RoundTable::RoundTableGameDBService.save werewolfGame
-    werewolfGame.to_json
+    game.start
+    RoundTable::RoundTableGameDBService.save game
+    game.to_json
   end
 
   # Change Time in Day in Gameroom
-  post '/gameroom/:gameroomid/:timeOfDay' do |gameroomid,timeOfDay|
+  post '/gameroom/:gameroomid/werewolf/:timeOfDay' do |gameroomid,timeOfDay|
     decoded_token=decodeToken(request)
 
     werewolfGame = RoundTable::RoundTableGameDBService.get gameroomid
@@ -131,7 +139,7 @@ class RoundTableAPI < Sinatra::Base
 
   # Next Round
   # Create Option for Captain
-  post '/gameroom/:gameroomid/option' do |gameroomid|
+  post '/gameroom/:gameroomid/next-round/option' do |gameroomid|
     # parse body
     payload = json_params unless empty_body?
     # create option
@@ -146,11 +154,11 @@ class RoundTableAPI < Sinatra::Base
     nextRoundGame.to_json
   end
   # Create Bet
-  post '/gameroom/:gameroomid/bet' do |gameroomid|
+  post '/gameroom/:gameroomid/next-round/bet' do |gameroomid|
     # parse body
     payload = json_params unless empty_body?
     # create bet
-    bet = RoundTable::NextRoundGameroom::Bet.new(payload)
+    bet = RoundTable::NextRoundGameroom::Option.new(payload)
     # get game
     nextRoundGame = RoundTable::RoundTableGameDBService.get gameroomid
     # add bet to game
@@ -161,21 +169,17 @@ class RoundTableAPI < Sinatra::Base
     nextRoundGame.to_json
   end
   # Change state of Bet 
-  put '/gameroom/:gameroomid/bet/:betid/state' do |gameroomid, betid|
+  put '/gameroom/:gameroomid/next-round/bet/:betid/state' do |gameroomid, betid|
     # parse body
     payload = json_params unless empty_body?
     # get game
     nextRoundGame = RoundTable::RoundTableGameDBService.get gameroomid
-    # get bet
-    bet = nextRoundGame.get_bet betid
     # update bet state
     # TODO lock this down to the captain only
-    if payload[:state] == "open" then
-      bet.open
-    elsif payload[:state] == "freeze" then
-      bet.freeze
+    if payload[:state] == "freeze" then
+      nextRoundGame.freeze_bet(betid)
     elsif payload[:state] == "close" then
-      bet.close
+      nextRoundGame.close_bet(betid,payload[:selection])
     end
     # save game
     RoundTable::RoundTableGameDBService.save nextRoundGame
@@ -184,7 +188,7 @@ class RoundTableAPI < Sinatra::Base
   end
 
   # Submit Bet selection
-  put '/gameroom/:gameroomid/bet/:betid/selection' do |gameroomid, betid|
+  put '/gameroom/:gameroomid/next-round/bet/:betid/selection' do |gameroomid, betid|
     # parse body
     payload = json_params unless empty_body?
     decoded_token=decodeToken(request)
@@ -201,7 +205,7 @@ class RoundTableAPI < Sinatra::Base
   # Needed for CORS
   options "*" do
     response.headers["Allow"] = "HEAD,GET,PUT,POST,DELETE,OPTIONS"
-  
+    response.headers["Access-Control-Allow-Methods"] = "HEAD,GET,PUT,POST,DELETE,OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept, Authorization"
   
     200

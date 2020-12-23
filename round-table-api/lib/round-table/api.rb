@@ -24,6 +24,11 @@ module RoundTable
     def exist?
       return !@id.empty?
     end
+    def start 
+      # Validate a game can start
+      raise 'Game has already started' if hasStarted
+      @hasStarted = true
+    end
     class Player
       attr_accessor :name
       def initialize(params = {}) 
@@ -112,6 +117,7 @@ module RoundTable
       betToClose = get_bet betId
       betToClose.close unless betToClose.nil?
       unless correctChoice.nil? then
+        betToClose.correctChoice = correctChoice
         correctPlayers = roster.select {|player| 
           bet = player.betsPlaced.find {|placed|
             placed[:id] == betId
@@ -135,6 +141,8 @@ module RoundTable
       player = get_player playerName
       raise "Player must be in gameroom to place a bet" if player.nil?
 
+      # ensure to see if bet is already placed
+      player.betsPlaced = player.betsPlaced.delete_if {|selectedBet| selectedBet[:id].eql? betId}
       player.betsPlaced.push({id:betId,selection:selection})
     end
     def getRole(playerName)
@@ -192,10 +200,13 @@ module RoundTable
     def as_json(options={})
       {
         id: @id,
+        type:@type,
         created: @created,
         roster: @roster,
         bets: @bets,
-        options: @options
+        options: @options,
+        hasStarted: @hasStarted,
+        hasFinished: @hasFinished,
       }
     end
     def to_json(*options)
@@ -205,7 +216,7 @@ module RoundTable
       "Id: #{id} Roster: #{roster} options: #{options}"
     end
     class Bet 
-      attr_accessor :id, :title, :description, :choiceA, :choiceB, :created, :state
+      attr_accessor :id, :title, :description, :choiceA, :choiceB, :created, :state, :correctChoice
       def initialize(params={})
         @id=params.fetch(:id, SecureRandom.uuid)
         @title=params.fetch(:title).strip
@@ -214,6 +225,7 @@ module RoundTable
         @choiceB=params.fetch(:choiceB).strip
         @created=params.fetch(:created,Time.now.getutc)
         @state=params.fetch(:state, "OPEN")
+        @correctChoice=params.fetch(:correctChoice, "").strip
       end
       def open
         @state="OPEN"
@@ -244,6 +256,7 @@ module RoundTable
           :choiceA => @choiceA,
           :choiceB => @choiceB,
           :created => @created.to_i,
+          :correctChoice => @correctChoice,
           :state => @state,
         }
       end
@@ -255,6 +268,7 @@ module RoundTable
           description: @description,
           choiceA: @choiceA,
           choiceB: @choiceB,
+          correctChoice: @correctChoice,
           state: @state
         }
       end
@@ -287,7 +301,6 @@ module RoundTable
       end
       def as_json(options={})
         {
-          id: @id,
           title: @title,
           description: @description,
           choiceA: @choiceA,
@@ -306,8 +319,8 @@ module RoundTable
       attr_accessor :betsPlaced, :points, :isCaptain
       def initialize(params = {}) 
         super params
-        @points=0
-        @betsPlaced = []
+        @points=params.fetch(:points,0).to_i
+        @betsPlaced = params.fetch(:betsPlaced,[]).map{|betPlaced| betPlaced.transform_keys(&:to_sym)}
         @isCaptain = params.fetch(:isCaptain, false)
       end
       def captain?
@@ -326,6 +339,17 @@ module RoundTable
           :betsPlaced => @betsPlaced,
           :points => @points,
         }
+      end
+      def as_json(options={})
+        {
+          name: @name,
+          isCaptain: @isCaptain,
+          betsPlaced: @betsPlaced,
+          points: @points,
+        }
+      end
+      def to_json(*options)
+        as_json(*options).to_json(*options)
       end
     end
   end
@@ -523,6 +547,7 @@ module RoundTable
       {
         id: @id,
         created: @created,
+        type:@type,
         roster: @roster,
         location: @location,
         hasStarted: @hasStarted,

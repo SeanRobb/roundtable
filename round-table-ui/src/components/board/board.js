@@ -29,6 +29,10 @@ const Board = () => {
       winner: ''
     },
     results: [],
+    waitingroom: {
+      description: "Loading",
+      canStart: false
+    },
     role: ""
   });
 
@@ -58,7 +62,7 @@ const Board = () => {
                 state.game.hasFinished?
                 <GameOverRoom game={state.game} />:
                   <Playroom state={state} />:
-                <WaitingRoom state={state.game}/>}
+                <WaitingRoom state={state.game} waitingroom={state.waitingroom}/>}
             </div>
           </div>
         );

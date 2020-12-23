@@ -38,8 +38,9 @@ RSpec.describe RoundTableAPI do
         context "Get gameroom information" do
           let(:response) {get "/gameroom/#{@stubGameroom.id}"}
           it "returns gameroom" do
+            puts response.body
             expect(response.status).to eq 200
-            expect(response.body).to eq({game:@stubGameroom,role:{},results:@votes}.to_json)
+            expect(response.body).to eq({game:@stubGameroom,role:{},waitingroom:{"description":"You need at least 7 players to play","canStart":false},results:@votes}.to_json)
           end
         end
         context "Register to a gameroom" do
@@ -71,7 +72,7 @@ RSpec.describe RoundTableAPI do
         context "Submit vote" do
           let(:response) {
             header 'Authorization', "Bearer #{@token}"
-            post "/gameroom/#{@stubGameroom.id}/vote", {vote: "Lauren"}.to_json
+            post "/gameroom/#{@stubGameroom.id}/werewolf/vote", {vote: "Lauren"}.to_json
           }
           it "returns gameroom" do
             expect(response.status).to eq 200
@@ -91,7 +92,7 @@ RSpec.describe RoundTableAPI do
         context "Send to night" do
           let(:response) {
             header 'Authorization', "Bearer #{@token}"
-            post "/gameroom/#{@stubGameroom.id}/night"
+            post "/gameroom/#{@stubGameroom.id}/werewolf/night"
           }
           it "returns gameroom" do
             expect(response.status).to eq 200
@@ -101,7 +102,7 @@ RSpec.describe RoundTableAPI do
         context "Send to day" do
           let(:response) {
             header 'Authorization', "Bearer #{@token}"
-            post "/gameroom/#{@stubGameroom.id}/day"
+            post "/gameroom/#{@stubGameroom.id}/werewolf/day"
           }
           it "returns gameroom" do
             expect(response.status).to eq 200
@@ -125,6 +126,10 @@ RSpec.describe RoundTableAPI do
           :id => "SWSG", :roster => [@player,@player2],
           :bets => [@bet],
           :get_bet => @bet,
+          :add_option=> @bet,
+          :open_bet=> @bet,
+          :freeze_bet=> @bet,
+          :close_bet=> @bet,
           :leaderboard=>@leaderboard,
           :getRole => {
             name: "This Is My Role",
@@ -146,7 +151,7 @@ RSpec.describe RoundTableAPI do
           let(:response) {get "/gameroom/#{@stubGameroom.id}"}
           it "returns gameroom" do
             expect(response.status).to eq 200
-            expect(response.body).to eq({game:@stubGameroom,role:{},leaderboard:@leaderboard}.to_json)
+            expect(response.body).to eq({game:@stubGameroom,role:{},waitingroom:{"description":"You need at least 2 players to play","canStart":true},leaderboard:@leaderboard}.to_json)
           end
         end
         context "Register to a gameroom" do
@@ -179,7 +184,7 @@ RSpec.describe RoundTableAPI do
         context "Create new option to game" do
           let(:response) {
             header 'Authorization', "Bearer #{@token}"
-            post "/gameroom/#{@stubGameroom.id}/option",
+            post "/gameroom/#{@stubGameroom.id}/next-round/option",
             {
               title: "Next touchdown",
               description: "Who will score the next touchdown?",
@@ -188,6 +193,7 @@ RSpec.describe RoundTableAPI do
             }.to_json
           }
           it "creates a new option in the game" do 
+            puts response.body
             expect(response.status).to eq 200
             data = JSON.parse(response.body)
             expect(response.body).to include(@stubGameroom.to_json)
@@ -196,7 +202,7 @@ RSpec.describe RoundTableAPI do
         context "Create new bet to game" do
           let(:response) {
             header 'Authorization', "Bearer #{@token}"
-            post "/gameroom/#{@stubGameroom.id}/bet",
+            post "/gameroom/#{@stubGameroom.id}/next-round/bet",
             {
               title: "Next touchdown",
               description: "Who will score the next touchdown?",
@@ -213,7 +219,7 @@ RSpec.describe RoundTableAPI do
         context "Change bet state in game" do
           let(:response) {
             header 'Authorization', "Bearer #{@token}"
-            put "/gameroom/#{@stubGameroom.id}/bet/#{@bet.id}/state",
+            put "/gameroom/#{@stubGameroom.id}/next-round/bet/#{@bet.id}/state",
             {
               state:"freeze"
             }.to_json
@@ -227,7 +233,7 @@ RSpec.describe RoundTableAPI do
         context "select a choice in a bet" do
           let(:response) {
             header 'Authorization', "Bearer #{@token}"
-            put "/gameroom/#{@stubGameroom.id}/bet/#{@bet.id}/selection",
+            put "/gameroom/#{@stubGameroom.id}/next-round/bet/#{@bet.id}/selection",
             {
               selection: @bet.choiceA
             }.to_json
