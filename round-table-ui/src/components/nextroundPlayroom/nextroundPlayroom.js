@@ -7,7 +7,6 @@ import Player from '../player/player';
 import { Typography, Grid, Paper, Container, Button, Fab }  from '@material-ui/core';
 import Leaderboard from '../leaderboard/leaderboard';
 import BetList from '../betList/betList';
-import OptionList from '../optionList/optionList';
 
 import ClosedBetsPopUp from '../closedBetsPopUp/closedBetsPopUp';
 import AddBetPopUp from '../addBetPopUp/addBetPopUp';
@@ -16,7 +15,6 @@ import AddOptionPopUp from '../addOptionPopUp/addOptionPopUp';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import History from '@material-ui/icons/History';
 import Add from '@material-ui/icons/Add';
-import PersonIcon from '@material-ui/icons/Person';
 
 const NextRoundPlayroom = (props) => {
   const currentHistory = useHistory();
@@ -81,9 +79,10 @@ const NextRoundPlayroom = (props) => {
                         <Typography variant='body2'>{props.state.game.id}</Typography>
                       </Grid>
                       <Grid item>
+                      {R.isEmpty(props.state.role)?
                         <Button onClick={()=>{
                           currentHistory.push('/register?game='+ props.state.game.id)
-                        }}>Register?</Button>
+                        }}>Register?</Button>:<div/>}
                       </Grid>
                     </Grid> 
                   </Grid>

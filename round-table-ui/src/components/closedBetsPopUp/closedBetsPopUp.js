@@ -32,7 +32,7 @@ const ClosedBetsPopUp = (props) => {
                 .map((bet)=> {
                   let players = getPlayersForBet(props.roster,bet);
                   return (
-                    <BetView bet={bet} role={props.role} players={players} key={bet.title.concat(bet.description)}></BetView>
+                    <BetView bet={bet} role={props.role} players={players} key={bet.id}></BetView>
                   );
                 }
                 )}

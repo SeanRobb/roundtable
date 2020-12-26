@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from './betView.module.css';
 import { Typography, Grid, Paper, Button } from '@material-ui/core';
-import Player from '../player/player';
+import Grade from '@material-ui/icons/Grade';
+import CheckIcon from '@material-ui/icons/Check';
 import {selectBet,freezeBet,closeBet} from '../../utils/index';
 import * as R from 'ramda';
 
@@ -44,6 +45,7 @@ const BetView = (props) => {
     }
 
   }
+
   const renderOptions = (selection) => {
     switch(props.bet.state) {
       case 'OPEN':
@@ -52,8 +54,14 @@ const BetView = (props) => {
             <Button 
             variant="contained"
             disabled={!isUserRegistered()}
-            color={didPlayerMakeSelection(selection)?"primary":"default"}
-            onClick={()=> selectBet(props.gameId, props.bet.id, selection)}>{selection}
+            color={didPlayerMakeSelection(selection)||state.selection==selection?"primary":"default"}
+            onClick={()=> { 
+              setState({
+                ...state,
+                selection: selection, 
+              });
+              selectBet(props.gameId, props.bet.id, selection)
+            }}>{selection}
           </Button>
           </div>
         );
@@ -78,7 +86,7 @@ const BetView = (props) => {
               ...state,
               selection: selection, 
             })}>
-            {selection} ({playersThatSelected(selection).length}) {didPlayerMakeSelection(selection)?"*":""}
+            {didPlayerMakeSelection(selection)?<Grade />:<div/>}{selection} ({playersThatSelected(selection).length})
           </Button>
         );
       case 'CLOSED':
@@ -91,12 +99,18 @@ const BetView = (props) => {
         }
         return (
           <Grid container
-            direction='column'
+            direction='row'
             style={{padding:'5px'}}
             >
             <Grid item>
+              {didPlayerMakeSelection(selection)?<Grade />:<div/>}
+            </Grid>
+            <Grid item>
+              {props.bet.correctChoice == selection?<CheckIcon />:<div/>}
+            </Grid>
+            <Grid item>
               <Typography variant={renderTitle(selection)}>
-                {selection} ({playersThatSelected(selection).length}) {didPlayerMakeSelection(selection)?"*":""}
+              {selection} ({playersThatSelected(selection).length})
               </Typography>
             </Grid>
           </Grid>

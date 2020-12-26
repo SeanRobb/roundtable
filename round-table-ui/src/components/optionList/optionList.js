@@ -32,12 +32,10 @@ return (
                 });  
               }
               let makeBet = () => {
-                console.log(`make bet`+ JSON.stringify(option))
                 createBet(props.gameId,option)
                 handleClose();
               }
               let editOption = () => {
-                console.log(`edit option`+ JSON.stringify(option))
                 handleClose();
               }
               let handleClose = () => {
@@ -60,7 +58,7 @@ return (
                     {/* <MenuItem onClick={editOption}>Edit Option</MenuItem> */}
                   </Menu>
                   
-                  <Button fullwidth={true} onClick={onClick}>
+                  <Button fullWidth={true} onClick={onClick}>
                     <Grid container
                       spacing={2} 
                       direction="column"
