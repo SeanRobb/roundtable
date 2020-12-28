@@ -53,7 +53,7 @@ const NextRoundPlayroom = (props) => {
       direction="row"
       justify="space-evenly"
       alignItems="stretch">
-        <Grid item md={2} s={4}>
+        <Grid item xs={12} sm={4} md={2} >
           <Paper style={{height:'100%', padding:'5px'}} elevation={1}>
             <Container style={{height:'100%', paddingLeft:'20px', paddingRight:'20px'}}>
                 <Grid container
@@ -90,7 +90,7 @@ const NextRoundPlayroom = (props) => {
               </Container>
           </Paper>
         </Grid>
-        <Grid item md={10} xs={12} s={8}>
+        <Grid item xs={12} sm={8} md={10}>
           <Leaderboard leaderboard={props.state.leaderboard} />
         </Grid>
         <Grid item xs={12}>

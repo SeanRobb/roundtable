@@ -12,7 +12,7 @@ const BetList = (props) => {
         let players = getPlayersForBet(props.roster,bet);
         return (
           <BetView 
-            key={bet.title.concat(bet.description)}
+            key={bet.id}
             gameId={props.gameId} 
             bet={bet} 
             players={players} 
@@ -34,11 +34,17 @@ const BetList = (props) => {
     <Paper style={{height:'100%', padding:'5px'}} elevation={1}>
       <Grid container
                 direction="column"
-                alignItems="center"
+                alignItems="stretch"
                 justify="center"
                 >
         <Grid item xs={12}>
-          <Typography variant="h3">Bets:</Typography>
+        <Grid container 
+          alignItems="center"
+          justify="center">
+            <Grid item>
+              <Typography variant="h3">Bets:</Typography>
+            </Grid>
+          </Grid>
         </Grid>
         <Grid item xs={12}>
           <Grid container
@@ -47,26 +53,40 @@ const BetList = (props) => {
             alignItems="stretch"
             justify="space-around"
                     >
-            <Grid item sm={6}>
+            <Grid item xs={12} sm={6} md={6} lg={6}>
               <Grid container 
                 direction="column"
-                alignItems="center"
+                alignItems="stretch"
+                spacing={2}
                 justify="center">
-                <Grid item>
-                  <Typography variant="h6">Open:</Typography>
+                <Grid item xs={12}>
+                  <Grid container 
+                  alignItems="center"
+                  justify="center">
+                    <Grid item>
+                      <Typography variant="h6">Open:</Typography>
+                    </Grid>
+                  </Grid>
                 </Grid>
-                <Grid item>
+                <Grid item xs={12}>
                   {renderBets("OPEN")}
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item sm={6} >
+            <Grid item xs={12} sm={6} md={6} lg={6}>
               <Grid container 
-                      direction="column"
-                      alignItems="center"
+                      direction="column" 
+                      alignItems="stretch"
+                      spacing={2}
                       justify="center">
                 <Grid item>
-                  <Typography variant="h6">Frozen:</Typography>
+                  <Grid container 
+                    alignItems="center"
+                    justify="center">
+                      <Grid item>
+                        <Typography variant="h6">Frozen:</Typography>
+                      </Grid>
+                  </Grid>
                 </Grid>
                 <Grid item>
                   {renderBets("FROZEN")}

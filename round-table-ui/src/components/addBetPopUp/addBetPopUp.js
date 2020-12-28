@@ -12,7 +12,7 @@ const AddBetPopUp = (props) => {
     >
       <Box className='popup\_inner'>  
         <DialogTitle>
-          Add Bet Popup
+          Add Bet
         </DialogTitle>
         <OptionList gameId={props.gameId} options={props.options} />
       </Box>  

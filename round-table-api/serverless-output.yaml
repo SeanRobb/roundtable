@@ -11,7 +11,7 @@ Resources:
       - DynamoDBCrudPolicy:
           TableName:
             Ref: RoundTableGamesTable
-      CodeUri: s3://round-table-api/6e2dbb7d9f1a6b7061ed108a2597b749
+      CodeUri: s3://round-table-api/73f420a20956e1da65b500d0614973d5
       MemorySize: 512
       Timeout: 30
       Events:

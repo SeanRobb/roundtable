@@ -16,11 +16,12 @@ const ClosedBetsPopUp = (props) => {
   return (
     <Dialog ref={props.inputRef} className={styles.closedBetsPopUp} data-testid="closedBetsPopUp"
       open={props.open}
+      fullWidth={true}
       onClose={props.onClose}
     >
       <Box className='popup\_inner'>  
         <DialogTitle>
-          Closed Bets Popup
+          Closed Bets
         </DialogTitle>
         <Grid container 
                     direction="column"
