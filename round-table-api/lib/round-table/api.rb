@@ -1,11 +1,13 @@
 require_relative "./api/version"
 require 'aws-record'
+require 'securerandom'
 
 module RoundTable
   class Gameroom
-    attr_accessor :id, :created, :hasStarted, :hasFinished
+    attr_accessor :id, :type, :created, :hasStarted, :hasFinished
     def initialize(params = {})
       @id = params.fetch(:id, (0...4).map { (65 + rand(26)).chr }.join)
+      @type = params.fetch(:type, "Werewolf")
       @created = params.fetch(:created, Time.now.getutc)
       @hasStarted = params.fetch(:hasStarted, false)
       @hasFinished = params.fetch(:hasFinished, false)
@@ -13,10 +15,19 @@ module RoundTable
     def to_model
       game = RoundTableGames.new()
       game.id=@id
+      game.gameType=@type
       game.created=@created
       game.hasStarted=@hasStarted
       game.hasFinished=@hasFinished
       game
+    end
+    def exist?
+      return !@id.empty?
+    end
+    def start 
+      # Validate a game can start
+      raise 'Game has already started' if hasStarted
+      @hasStarted = true
     end
     class Player
       attr_accessor :name
@@ -37,14 +48,316 @@ module RoundTable
       def exist?
         !name.empty?
       end
+      def to_s
+        "#{@name} - #{@isActive ? "Active": "Inactive"}"
+      end
       def ==(other)
         self.name.downcase == other.name.downcase
       end
     end
   end
+  class NextRoundGameroom < Gameroom
+    attr_accessor :roster, :bets, :options
+    def initialize(params={})
+      params[:type] = "Next Round"
+      super params
+      @roster = params.fetch(:roster, [])
+      @bets=params.fetch(:bets, [])
+      @options=params.fetch(:options, [])
+
+      gameInfo = params.fetch(:gameInfo, {}).transform_keys(&:to_sym)
+
+      @bets=gameInfo[:bets] if gameInfo.has_key? :bets 
+      @options=gameInfo[:options] if gameInfo.has_key? :options 
+
+      @roster=gameInfo[:roster] if gameInfo.has_key? :roster 
+      @roster = @roster.map { |player| 
+        player = NextRoundPlayer.new(player.transform_keys(&:to_sym)) unless player.is_a? (NextRoundPlayer)
+        player
+      }
+      @bets = @bets.map { |bet| 
+        bet = Bet.new(bet.transform_keys(&:to_sym)) unless bet.is_a? (Bet)
+        bet
+      }
+      @options = @options.map { |option| 
+        option = Option.new(option.transform_keys(&:to_sym)) unless option.is_a? (Option)
+        option
+      }
+    end
+    def add_player(player)
+      raise 'Player already exists' if roster.include? player
+      player.makeCaptain if roster.length == 0
+
+      roster.push(player)
+    end
+    def add_option(option)
+      raise 'Option already exists' if options.include? option
+      options.push(option)
+    end
+    def get_bet(betId)
+      bets.find {|bet|
+        bet.id == betId
+      }
+    end
+    def get_player(playerName)
+      roster.find {|player| 
+        player.name == playerName
+      }
+    end
+    def open_bet(option)
+      bet = option.to_bet
+      bets.push(bet)
+      bet
+    end
+    def freeze_bet(betId)
+      betToFreeze = get_bet betId
+      betToFreeze.freeze unless betToFreeze.nil?
+    end
+    def close_bet(betId, correctChoice=nil)
+      betToClose = get_bet betId
+      betToClose.close unless betToClose.nil?
+      unless correctChoice.nil? then
+        betToClose.correctChoice = correctChoice
+        correctPlayers = roster.select {|player| 
+          bet = player.betsPlaced.find {|placed|
+            placed[:id] == betId
+          }
+          next if bet.nil?
+          next unless bet[:selection] == correctChoice
+          player
+        }
+        correctPlayers.each {|player|
+          player.points = player.points + 1
+        }
+      end
+    end
+    def place_bet(playerName, betId, selection)
+      bet = get_bet betId
+
+      raise "Bet must exist to have a selection to be placed" if bet.nil?
+      raise "Selection must be a choice to place a bet" unless bet.choiceA == selection or bet.choiceB == selection
+      raise "Bet must be open to be placed" unless bet.opened?
+
+      player = get_player playerName
+      raise "Player must be in gameroom to place a bet" if player.nil?
+
+      # ensure to see if bet is already placed
+      player.betsPlaced = player.betsPlaced.delete_if {|selectedBet| selectedBet[:id].eql? betId}
+      player.betsPlaced.push({id:betId,selection:selection})
+    end
+    def getRole(playerName)
+      player = @roster.find {|player| player.name == playerName}
+      return {} unless player
+      role ={
+        player: player,
+        name:"",
+      }
+      if player.captain? 
+        role[:name] = "Captain"
+      else
+        role[:name] = "Player" 
+      end
+
+      return role
+    end
+    def leaderboard
+      roster.map {|player| 
+        {name:player.name, points:player.points}
+      }.sort {|a1,a2| a2[:points] <=> a1[:points]}
+    end
+    def openBets
+      bets.select(&:opened?)
+    end
+    def frozenBets
+      bets.select(&:frozen?)
+    end
+    def closedBets
+      bets.select(&:closed?)
+    end
+    def captain
+      roster.find(&:captain?)
+    end
+    def ==(other)
+      self.id == other.id
+      self.created == other.created
+      self.hasStarted == other.hasStarted
+      self.hasFinished == other.hasFinished
+
+      self.roster == other.roster
+      self.bets == other.bets
+      self.options == other.options
+    end
+    def to_model
+      game = super
+      gameInfo = Hash.new
+      gameInfo[:roster]=@roster
+      gameInfo[:bets]=@bets
+      gameInfo[:options]=@options
+      game.gameInfo = gameInfo
+
+      game
+    end
+    def as_json(options={})
+      {
+        id: @id,
+        type:@type,
+        created: @created,
+        roster: @roster,
+        bets: @bets,
+        options: @options,
+        hasStarted: @hasStarted,
+        hasFinished: @hasFinished,
+      }
+    end
+    def to_json(*options)
+      as_json(*options).to_json(*options)
+    end
+    def to_s
+      "Id: #{id} Roster: #{roster} options: #{options}"
+    end
+    class Bet 
+      attr_accessor :id, :title, :description, :choiceA, :choiceB, :created, :state, :correctChoice
+      def initialize(params={})
+        @id=params.fetch(:id, SecureRandom.uuid)
+        @title=params.fetch(:title).strip
+        @description=params.fetch(:description).strip
+        @choiceA=params.fetch(:choiceA).strip
+        @choiceB=params.fetch(:choiceB).strip
+        @created=params.fetch(:created,Time.now.getutc)
+        @state=params.fetch(:state, "OPEN")
+        @correctChoice=params.fetch(:correctChoice, "").strip
+      end
+      def open
+        @state="OPEN"
+      end
+      def freeze
+        @state="FROZEN"
+      end
+      def close
+        @state="CLOSED"
+      end
+      def opened?
+        @state == "OPEN"
+      end
+      def frozen?
+        @state == "FROZEN"
+      end
+      def closed?
+        @state == "CLOSED"
+      end
+      def ==(other)
+        self.id == other.id
+      end
+      def to_h(*options)
+        {
+          :id => @id,
+          :title => @title,
+          :description => @description,
+          :choiceA => @choiceA,
+          :choiceB => @choiceB,
+          :created => @created.to_i,
+          :correctChoice => @correctChoice,
+          :state => @state,
+        }
+      end
+      def as_json(options={})
+        {
+          id: @id,
+          title: @title,
+          created: @created,
+          description: @description,
+          choiceA: @choiceA,
+          choiceB: @choiceB,
+          correctChoice: @correctChoice,
+          state: @state
+        }
+      end
+      def to_json(*options)
+        as_json(*options).to_json(*options)
+      end
+    end
+    class Option
+      attr_accessor :title, :description, :choiceA, :choiceB
+      def initialize(params={})
+        @title=params.fetch(:title).strip
+        @description=params.fetch(:description).strip
+        @choiceA=params.fetch(:choiceA).strip
+        @choiceB=params.fetch(:choiceB).strip
+      end
+      def to_bet
+        RoundTable::NextRoundGameroom::Bet.new(
+          title:@title,
+          description:@description,
+          choiceA:@choiceA,
+          choiceB:@choiceB)
+      end
+      def to_h(*options)
+        {
+          :title => @title,
+          :description => @description,
+          :choiceA => @choiceA,
+          :choiceB => @choiceB,
+        }
+      end
+      def as_json(options={})
+        {
+          title: @title,
+          description: @description,
+          choiceA: @choiceA,
+          choiceB: @choiceB,
+        }
+      end
+      def to_json(*options)
+        as_json(*options).to_json(*options)
+      end
+      def ==(other)
+        self.title.downcase == other.title.downcase &&
+         self.description.downcase == other.description.downcase 
+      end
+    end
+    class NextRoundPlayer < Player
+      attr_accessor :betsPlaced, :points, :isCaptain
+      def initialize(params = {}) 
+        super params
+        @points=params.fetch(:points,0).to_i
+        @betsPlaced = params.fetch(:betsPlaced,[]).map{|betPlaced| betPlaced.transform_keys(&:to_sym)}
+        @isCaptain = params.fetch(:isCaptain, false)
+      end
+      def captain?
+        @isCaptain
+      end
+      def makeCaptain
+        @isCaptain = true
+      end
+      def makePlayer
+        @isCaptain = false
+      end
+      def to_h(*options)
+        {
+          :name => @name,
+          :isCaptain => @isCaptain,
+          :betsPlaced => @betsPlaced,
+          :points => @points,
+        }
+      end
+      def as_json(options={})
+        {
+          name: @name,
+          isCaptain: @isCaptain,
+          betsPlaced: @betsPlaced,
+          points: @points,
+        }
+      end
+      def to_json(*options)
+        as_json(*options).to_json(*options)
+      end
+    end
+  end
+  # TODO refactor to snake case functions
   class WerewolfGameroom < Gameroom
     attr_accessor :roster, :location, :villageWins
     def initialize(params = {})
+      params[:type] = "Werewolf"
       super params
 
       @roster = params.fetch(:roster, [])
@@ -64,7 +377,7 @@ module RoundTable
       # TODO clarify parsing of object
       @location = Location.from_json(@location) unless @location.is_a? (Location)
     end
-    def addPlayer(player)
+    def add_player(player)
       raise 'Player already exists' if roster.include? player
       raise 'Game has already started' if @hasStarted
       player.makeNarrator if roster.length == 0
@@ -100,7 +413,6 @@ module RoundTable
       potentialWerewolves = @roster.reject { |player| player.narrator? or player.werewolf? } 
       potentialWerewolves[rand(potentialWerewolves.length-1)].makeWerewolf
     end
-
     def sendToDay(callerName)
       raise "Only narrator can change day" unless callerName == narrator.name
       return nil unless @location.night?
@@ -235,6 +547,7 @@ module RoundTable
       {
         id: @id,
         created: @created,
+        type:@type,
         roster: @roster,
         location: @location,
         hasStarted: @hasStarted,
@@ -245,9 +558,7 @@ module RoundTable
     def to_json(*options)
       as_json(*options).to_json(*options)
     end
-    def exist?
-      return !id.empty?
-    end
+
     def to_model
       game = super
       gameInfo = Hash.new
@@ -386,6 +697,7 @@ module RoundTable
     include Aws::Record
     set_table_name "RoundTableGames"
     string_attr :id, hash_key: true
+    string_attr :gameType
     datetime_attr :created
     boolean_attr :hasStarted
     boolean_attr :hasFinished
@@ -393,13 +705,14 @@ module RoundTable
     map_attr :gameInfo
   end
 
-
   module RoundTableGameDBService
     def self.get(gameroomId)
       game = RoundTable::RoundTableGames.find(id:gameroomId)
       return nil if game.nil?
-      puts game.to_h
-      gameroom=RoundTable::WerewolfGameroom.new(game.to_h) unless game.nil?
+      return nil if game.nil?
+      gameroom=RoundTable::WerewolfGameroom.new(game.to_h) if game.gameType == "Werewolf"
+    
+      gameroom=RoundTable::NextRoundGameroom.new(game.to_h) if game.gameType == "Next Round"
       gameroom
     end
     def self.save(gameroom)

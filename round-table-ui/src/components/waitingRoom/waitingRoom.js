@@ -22,11 +22,12 @@ return (
           <Paper elevation={2}>
             <Grid container justify='space-around' alignItems='center'>
               <Grid item>
-                <Typography variant='h3'>Waiting room</Typography>
+                <Typography variant='h3'>Waitingroom</Typography>
               </Grid>
               <Grid item>
                 <Grid container direction='column' alignItems='center'>
                   <Grid item>
+                    <Typography variant='h5'>Type: {props.state.type}</Typography>
                     <Typography variant='h5'>Roomcode: {props.state.id}</Typography>
                   </Grid>
                   <Grid item>
@@ -45,7 +46,7 @@ return (
             <Grid container>
               {props.state.roster.map((player) => {
                 return ( <Grid item key={player.name}>
-                  <Player name={player.name} isNarrator={player.isNarrator}></Player>
+                  <Player name={player.name} isNarrator={player.isNarrator||player.isCaptain}></Player>
                 </Grid>
                 );
               })}
@@ -56,10 +57,10 @@ return (
           <Paper elevation={2}>
             <Grid container direction='column' justify='center' alignItems='center'>
               <Grid item>
-                <Typography variant='h6'> {props.state.roster.length < 7? "You need at least 7 players to play":"Ready to play?"}</Typography>
+                <Typography variant='h6'> {props.waitingroom.canStart?"Ready to play?":props.waitingroom.description}</Typography>
               </Grid>
               <Grid item>
-                <Button variant="outlined" onClick={start} disabled={props.state.roster.length < 7}>
+                <Button variant="outlined" onClick={start} disabled={!props.waitingroom.canStart}>
                   Start Game
                 </Button>
               </Grid>
