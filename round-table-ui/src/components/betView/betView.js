@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import styles from './betView.module.css';
-import { Typography, Grid, Paper, Button, CircularProgress } from '@material-ui/core';
+import { Typography, Grid, Paper, Button, CircularProgress,IconButton } from '@material-ui/core';
 import Grade from '@material-ui/icons/Grade';
 import CheckIcon from '@material-ui/icons/Check';
 import AcUnitIcon from '@material-ui/icons/AcUnit';
+import LaunchIcon from '@material-ui/icons/Launch';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
+import PlusOneIcon from '@material-ui/icons/PlusOne';
 import {selectBet,freezeBet,closeBet} from '../../utils/index';
 import * as R from 'ramda';
 
@@ -35,6 +37,9 @@ const BetView = (props) => {
     }
     return playersThatSelected(selection).includes(props.role.player.name);
   } 
+  const isCorrectSelection = (selection) =>{
+    return props.bet.correctChoice === selection
+  }
 
   const renderProgress = () => {
     return (
@@ -54,15 +59,15 @@ const BetView = (props) => {
     switch(props.bet.state) {
       case 'OPEN':
         return (
-          <Button 
+          <IconButton 
             onClick={()=> freezeBet(props.gameId, props.bet.id)}
-          ><AcUnitIcon/></Button>
+          ><AcUnitIcon/></IconButton>
         )
       case 'FROZEN':
         return (
-          <Button 
+          <IconButton 
             onClick={()=>closeBet(props.gameId,props.bet.id,state.selection)}
-          ><LockOpenIcon/></Button>
+          ><LockOpenIcon/></IconButton>
         )
       case 'CLOSED':
         return (
@@ -169,13 +174,18 @@ const BetView = (props) => {
           }
         }
         return (
+          <Button 
+          variant="contained"
+          fullWidth={true}
+          disableRipple={true}
+          >
           <Grid container
             direction='row'
             justify='space-between'
             alignItems='center'
             >
             <Grid item xs={2} >
-              {props.bet.correctChoice == selection?<Grade />:<div/>}
+              {isCorrectSelection(selection)?<Grade />:<div/>}
             </Grid>
             <Grid item xs={8} >
               <Typography variant={renderTitle(selection)} align='center'>
@@ -191,6 +201,7 @@ const BetView = (props) => {
               </Grid>
             </Grid>
           </Grid>
+          </Button>
         );
     }
     return (
@@ -251,9 +262,7 @@ const BetView = (props) => {
                             alignItems='center'>
                               <Grid item>
                                 {renderCaptainButtons()}
-                              </Grid>
-                              <Grid item>
-                                {props.bet.state==='OPEN'?<Typography variant="body2">Total: {props.players.length}</Typography>:<div/>}
+                                {isCorrectSelection(getPlayerSelection())?<PlusOneIcon/>:<div/>}
                               </Grid>
                             </Grid>
                           </Grid>
@@ -279,6 +288,20 @@ const BetView = (props) => {
                       {renderOptions(props.bet.choiceB)}
                     </Paper>
                   </Grid>
+                </Grid>
+              </Grid>
+              <Grid item>
+                <Grid container
+                alignItems='center'
+                justify='space-between'>
+                  <Grid item>
+                    {<Typography variant="body2">Bets placed: {props.players.length}</Typography>}
+                  </Grid> 
+                  <Grid item>
+                  <IconButton 
+                      disabled={true}
+                    ><LaunchIcon/></IconButton>
+                  </Grid>               
                 </Grid>
               </Grid>
             </Grid>

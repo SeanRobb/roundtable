@@ -24,21 +24,28 @@ const ClosedBetsPopUp = (props) => {
           Closed Bets
         </DialogTitle>
         <Grid container 
-                    direction="column"
-                    alignItems="center"
-                    justify="center">
-              <Grid item>
-                {props.bets
-                .filter((bet) => bet.state == "CLOSED")
-                .map((bet)=> {
-                  let players = getPlayersForBet(props.roster,bet);
-                  return (
-                    <BetView bet={bet} role={props.role} players={players} key={bet.id}></BetView>
-                  );
-                }
-                )}
-              </Grid>
+          direction="column"
+          alignItems="center"
+          justify="center">
+          <Grid item>
+            <Grid container
+                direction='column'
+                spacing={2}>
+              {props.bets
+              .filter((bet) => bet.state == "CLOSED")
+              .map((bet)=> {
+                let players = getPlayersForBet(props.roster,bet);
+                return (
+                  <Grid item 
+                  key={bet.id}>
+                    <BetView bet={bet} role={props.role} players={players}></BetView>
+                  </Grid>
+                );
+              }
+              )}
             </Grid>
+          </Grid>
+        </Grid>
       </Box>  
     </Dialog>
 )};

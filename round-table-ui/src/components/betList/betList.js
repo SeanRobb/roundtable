@@ -10,13 +10,15 @@ const BetList = (props) => {
       .map((bet)=> {
         let players = getPlayersForBet(props.roster,bet);
         return (
-          <BetView 
-            key={bet.id}
-            gameId={props.gameId} 
-            bet={bet} 
-            players={players} 
-            role={props.role}
-          />
+          <Grid item 
+          key={bet.id}>
+            <BetView 
+              gameId={props.gameId} 
+              bet={bet} 
+              players={players} 
+              role={props.role}
+            />
+          </Grid>
         );
       })
   }
@@ -68,7 +70,11 @@ const BetList = (props) => {
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                  {renderBets("OPEN")}
+                  <Grid container
+                    direction='column'
+                    spacing={2}>
+                    {renderBets("OPEN")}
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
@@ -88,7 +94,11 @@ const BetList = (props) => {
                   </Grid>
                 </Grid>
                 <Grid item>
+                <Grid container
+                    direction='column'
+                    spacing={2}>
                   {renderBets("FROZEN")}
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
