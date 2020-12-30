@@ -2,6 +2,9 @@ import React, { useState }  from 'react';
 import styles from './optionList.module.css';
 import { Typography, Grid, Paper, Button, Menu, MenuItem } from '@material-ui/core';
 import {createBet,deleteOption} from '../../utils/index';
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 
 
 const OptionList = (props) => {
@@ -51,9 +54,9 @@ return (
                     open={Boolean(state.menuState[index])}
                     onClose={handleClose}
                   >
-                    <MenuItem onClick={makeBet}>Make Bet</MenuItem>
-                    <MenuItem onClick={()=>props.editOption(option)}>Edit Option</MenuItem>
-                    <MenuItem onClick={deleteOptionClick}>Delete Option</MenuItem>
+                    <MenuItem onClick={makeBet}><AddIcon/>Make Bet</MenuItem>
+                    <MenuItem onClick={()=>props.editOption(option)}><EditIcon/>Edit Option</MenuItem>
+                    <MenuItem onClick={deleteOptionClick}><DeleteIcon/>Delete Option</MenuItem>
                   </Menu>
                   
                   <Button fullWidth={true} onClick={onClick}>
