@@ -118,6 +118,7 @@ RSpec.describe RoundTableAPI do
         @player.activate
         @player2 = RoundTable::NextRoundGameroom::NextRoundPlayer.new(name:"Lauren")
         @player2.activate
+        @option=createOption
         @bet=createBet
         @leaderboard=[{name:"Sean", points:10}, {name:"Lauren", points:3}]
         @stubGameroom = object_double(RoundTable::NextRoundGameroom.new, :type => "Next Round",
@@ -125,6 +126,7 @@ RSpec.describe RoundTableAPI do
           :place_bet => nil,
           :id => "SWSG", :roster => [@player,@player2],
           :bets => [@bet],
+          :options=> [@option],
           :get_bet => @bet,
           :add_option=> @bet,
           :open_bet=> @bet,
@@ -193,10 +195,21 @@ RSpec.describe RoundTableAPI do
             }.to_json
           }
           it "creates a new option in the game" do 
-            puts response.body
             expect(response.status).to eq 200
             data = JSON.parse(response.body)
             expect(response.body).to include(@stubGameroom.to_json)
+          end
+        end
+        context "delete option to game" do
+          let(:response) {
+            header 'Authorization', "Bearer #{@token}"
+            delete "/gameroom/#{@stubGameroom.id}/next-round/option/#{@option.id}"
+          }
+          it "creates a new option in the game" do 
+            data = JSON.parse(response.body)
+            expect(response.status).to eq 200
+            expect(response.body).to include(@stubGameroom.to_json)
+            expect(data["options"]).to_not include(@option.to_json)
           end
         end
         context "Create new bet to game" do

@@ -1,8 +1,7 @@
 import React, { useState }  from 'react';
-import PropTypes from 'prop-types';
 import styles from './optionList.module.css';
 import { Typography, Grid, Paper, Button, Menu, MenuItem } from '@material-ui/core';
-import {createBet} from '../../utils/index';
+import {createBet,deleteOption} from '../../utils/index';
 
 
 const OptionList = (props) => {
@@ -18,9 +17,6 @@ return (
                 justify="center"
                 >
           <Grid item>
-            <Typography variant="h5">Options:</Typography>
-          </Grid>
-          <Grid item>
             {props.options
             .map((option, index)=> {
               let onClick = (event) => {
@@ -35,7 +31,8 @@ return (
                 createBet(props.gameId,option)
                 handleClose();
               }
-              let editOption = () => {
+              let deleteOptionClick = () => {
+                deleteOption(props.gameId,option.id)
                 handleClose();
               }
               let handleClose = () => {
@@ -55,7 +52,7 @@ return (
                     onClose={handleClose}
                   >
                     <MenuItem onClick={makeBet}>Make Bet</MenuItem>
-                    {/* <MenuItem onClick={editOption}>Edit Option</MenuItem> */}
+                    <MenuItem onClick={deleteOptionClick}>Delete Option</MenuItem>
                   </Menu>
                   
                   <Button fullWidth={true} onClick={onClick}>

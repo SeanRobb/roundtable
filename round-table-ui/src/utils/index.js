@@ -92,6 +92,14 @@ const createOption = (gameId, option) => {
   return fetch(config.url.API_URL+'/gameroom/' + gameId + '/next-round/option',requestOptions)
     .then((res) => res.json());
 };
+const deleteOption = (gameId, optionid) => {
+  const requestOptions = {
+    method: 'DELETE',
+    headers: getHeaders()
+  };
+  return fetch(config.url.API_URL+'/gameroom/' + gameId + '/next-round/option/'+optionid,requestOptions)
+    .then((res) => res.json());
+};
 
 const startGame = (gameId) =>{
   const requestOptions = {
@@ -150,6 +158,7 @@ export {
   closeBet,
   freezeBet,
   createOption,
+  deleteOption,
   getHeaders,
   getUsername,
   clearUsername,

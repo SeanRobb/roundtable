@@ -277,8 +277,9 @@ module RoundTable
       end
     end
     class Option
-      attr_accessor :title, :description, :choiceA, :choiceB
+      attr_accessor :id, :title, :description, :choiceA, :choiceB
       def initialize(params={})
+        @id=params.fetch(:id, SecureRandom.uuid)
         @title=params.fetch(:title).strip
         @description=params.fetch(:description).strip
         @choiceA=params.fetch(:choiceA).strip
@@ -293,6 +294,7 @@ module RoundTable
       end
       def to_h(*options)
         {
+          :id=>@id,
           :title => @title,
           :description => @description,
           :choiceA => @choiceA,
@@ -301,6 +303,7 @@ module RoundTable
       end
       def as_json(options={})
         {
+          id:@id,
           title: @title,
           description: @description,
           choiceA: @choiceA,

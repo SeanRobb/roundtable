@@ -153,6 +153,19 @@ class RoundTableAPI < Sinatra::Base
     # return saved game
     nextRoundGame.to_json
   end
+  #delete option
+  delete '/gameroom/:gameroomid/next-round/option/:optionid' do |gameroomid,optionid|
+    # parse body
+    payload = json_params unless empty_body?
+    # get game
+    nextRoundGame = RoundTable::RoundTableGameDBService.get gameroomid
+    # add option to game
+    nextRoundGame.options.delete_if {|option| option.id == optionid}
+    # save game
+    RoundTable::RoundTableGameDBService.save nextRoundGame
+    # return saved game
+    nextRoundGame.to_json
+  end
   # Create Bet
   post '/gameroom/:gameroomid/next-round/bet' do |gameroomid|
     # parse body
