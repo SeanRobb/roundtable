@@ -13,6 +13,9 @@ import * as R from 'ramda';
 
 const BetView = (props) => {
   const getPlayerSelection = () => {
+    if (props.role.player===undefined){
+      return "";
+    }
     let player = props.players.find((player) => player.name === props.role.player.name);
     if (player === undefined){
       return "";
@@ -321,6 +324,12 @@ const BetView = (props) => {
 
 BetView.propTypes = {};
 
-BetView.defaultProps = {};
+BetView.defaultProps = {
+  role:{
+    player:{
+      name:""
+    }
+  }
+};
 
 export default BetView;
