@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from "react-router-dom";
 import * as R from 'ramda';
-import PropTypes from 'prop-types';
 import styles from './nextroundPlayroom.module.css';
 import Player from '../player/player';
-import { Typography, Grid, Paper, Container, Button, Fab }  from '@material-ui/core';
+import { Typography, Grid, Paper, Container, Button, Fab,Link }  from '@material-ui/core';
 import Leaderboard from '../leaderboard/leaderboard';
 import BetList from '../betList/betList';
 
@@ -13,6 +12,7 @@ import AddBetPopUp from '../addBetPopUp/addBetPopUp';
 import AddOptionPopUp from '../addOptionPopUp/addOptionPopUp';
 
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import LinkIcon from '@material-ui/icons/Link';
 import History from '@material-ui/icons/History';
 import Add from '@material-ui/icons/Add';
 
@@ -54,7 +54,7 @@ const NextRoundPlayroom = (props) => {
       justify="space-evenly"
       alignItems="stretch">
         <Grid item xs={12} sm={4} md={2} >
-          <Paper style={{height:'100%', padding:'5px'}} elevation={1}>
+          <Paper style={{height:'100%'}} elevation={1}>
             <Container style={{height:'100%', paddingLeft:'20px', paddingRight:'20px'}}>
                 <Grid container
                   alignItems="center"
@@ -75,14 +75,29 @@ const NextRoundPlayroom = (props) => {
                       <Grid item>
                         <Typography variant='body2'>Roomcode:</Typography>
                       </Grid>
-                      <Grid item>
-                        <Typography variant='body2'>{props.state.game.id}</Typography>
+                        <Grid item>
+                          <Link  href={window.location.href}>
+                            <Grid container
+                              justify='center'
+                              alignItems='center'
+                              spacing={1}
+                            >
+                          <Grid item>
+                            <LinkIcon/>
+                          </Grid>
+                          <Grid item>
+                            <Typography variant='body2'>{props.state.game.id}</Typography>
+                          </Grid>
+                        </Grid>
+                        </Link>
                       </Grid>
                       <Grid item>
                       {R.isEmpty(props.state.role)?
                         <Button onClick={()=>{
                           currentHistory.push('/register?game='+ props.state.game.id)
                         }}>Register?</Button>:<div/>}
+                      </Grid>
+                      <Grid item>
                       </Grid>
                     </Grid> 
                   </Grid>

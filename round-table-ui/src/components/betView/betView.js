@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import styles from './betView.module.css';
-import { Typography, Grid, Paper, Button } from '@material-ui/core';
+import { Typography, Grid, Paper, Button, CircularProgress } from '@material-ui/core';
 import Grade from '@material-ui/icons/Grade';
 import CheckIcon from '@material-ui/icons/Check';
+import AcUnitIcon from '@material-ui/icons/AcUnit';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
 import {selectBet,freezeBet,closeBet} from '../../utils/index';
 import * as R from 'ramda';
 
 
 const BetView = (props) => {
-  const [state, setState] = useState({selection:"",isCaptain:props.role.name == "Captain"});
+  const getPlayerSelection = () => {
+    let player = props.players.find((player) => player.name === props.role.player.name);
+    if (player === undefined){
+      return "";
+    }
+    return player.selection;
+  }
+
+  const [state, setState] = useState({selection:getPlayerSelection(),isCaptain:props.role.name == "Captain"});
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(true);
 
   const isUserRegistered = () => {
     return !R.isEmpty(props.role)
@@ -23,6 +35,16 @@ const BetView = (props) => {
     }
     return playersThatSelected(selection).includes(props.role.player.name);
   } 
+
+  const renderProgress = () => {
+    return (
+      <div>
+        {loading?<CircularProgress color="inherit" size={24} />:<div/>}
+        {success?<CheckIcon />:<div/>}
+      </div>
+    );
+  }
+
   const renderCaptainButtons = () =>{
     if (!state.isCaptain) {
      return (
@@ -32,11 +54,15 @@ const BetView = (props) => {
     switch(props.bet.state) {
       case 'OPEN':
         return (
-          <Button onClick={()=> freezeBet(props.gameId, props.bet.id)}>Freeze Bet</Button>
+          <Button 
+            onClick={()=> freezeBet(props.gameId, props.bet.id)}
+          ><AcUnitIcon/></Button>
         )
       case 'FROZEN':
         return (
-          <Button onClick={()=>closeBet(props.gameId,props.bet.id,state.selection)}>Close Bet</Button>
+          <Button 
+            onClick={()=>closeBet(props.gameId,props.bet.id,state.selection)}
+          ><LockOpenIcon/></Button>
         )
       case 'CLOSED':
         return (
@@ -50,20 +76,46 @@ const BetView = (props) => {
     switch(props.bet.state) {
       case 'OPEN':
         return (
-          <div>
             <Button 
             variant="contained"
             disabled={!isUserRegistered()}
-            color={didPlayerMakeSelection(selection)||state.selection==selection?"primary":"default"}
+            color={state.selection==selection?"primary":"default"}
+            fullWidth={true}
             onClick={()=> { 
+              setLoading(true);
+              setSuccess(false);
               setState({
                 ...state,
-                selection: selection, 
+                selection: selection,
               });
+
               selectBet(props.gameId, props.bet.id, selection)
-            }}>{selection}
+                .then(()=>
+                {
+                  setTimeout(()=>{
+                    setLoading(false);
+                    setSuccess(true);
+                  }, 500);
+                });
+            }}>
+              <Grid container
+                justify='center'
+                alignItems='center'>
+                <Grid item xs={2} sm={1}> 
+                </Grid>
+                <Grid item xs={8} sm={10}>
+                  {selection}
+                </Grid>
+                <Grid item xs={2} sm={1}>
+                  <Grid container
+                  justify='flex-end'>
+                    <Grid item>
+                      {selection===state.selection?renderProgress():<div/>}
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
           </Button>
-          </div>
         );
       case 'CLOSING':
         return (
@@ -71,6 +123,7 @@ const BetView = (props) => {
             <Button 
               variant="contained"
               disabled={!isUserRegistered()}
+              fullWidth={true}
               color={didPlayerMakeSelection(selection)?"primary":"default"}
               onClick={()=> closeBet(props.gameId, props.bet.id, selection)}>{selection}
             </Button>
@@ -82,11 +135,29 @@ const BetView = (props) => {
             variant="contained"
             color={state.selection==selection?"primary":"default"}
             disabled={!state.isCaptain}
+            fullWidth={true}
             onClick={()=>setState({
               ...state,
               selection: selection, 
             })}>
-            {didPlayerMakeSelection(selection)?<Grade />:<div/>}{selection} ({playersThatSelected(selection).length})
+            <Grid container
+              justify='center'
+              alignItems='center'>
+              <Grid item xs={2} sm={1}> 
+              {state.selection === selection?<Grade />:<div/>}
+              </Grid>
+              <Grid item xs={8} sm={10}>
+                {selection} ({playersThatSelected(selection).length})
+              </Grid>
+              <Grid item xs={2} sm={1}>
+                <Grid container
+                  justify='flex-end'>
+                    <Grid item>
+                      {didPlayerMakeSelection(selection)?<CheckIcon />:<div/>} 
+                    </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
           </Button>
         );
       case 'CLOSED':
@@ -100,18 +171,24 @@ const BetView = (props) => {
         return (
           <Grid container
             direction='row'
-            style={{padding:'5px'}}
+            justify='space-between'
+            alignItems='center'
             >
-            <Grid item>
-              {didPlayerMakeSelection(selection)?<Grade />:<div/>}
+            <Grid item xs={2} >
+              {props.bet.correctChoice == selection?<Grade />:<div/>}
             </Grid>
-            <Grid item>
-              {props.bet.correctChoice == selection?<CheckIcon />:<div/>}
-            </Grid>
-            <Grid item>
-              <Typography variant={renderTitle(selection)}>
+            <Grid item xs={8} >
+              <Typography variant={renderTitle(selection)} align='center'>
               {selection} ({playersThatSelected(selection).length})
               </Typography>
+            </Grid>
+            <Grid item xs={2} >
+              <Grid container
+                justify='flex-end'>
+                <Grid item>
+                  {didPlayerMakeSelection(selection)?<CheckIcon />:<div/>}
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         );
@@ -126,10 +203,11 @@ const BetView = (props) => {
     <div className={styles.betView} data-testid="betView">
       <Paper style={{height:'100%', padding:'5px'}} elevation={2} >
         <Grid container
+          direction='column'
           alignItems="stretch"
           justify="center"
         >
-          <Grid item>
+          <Grid item xs={12}>
             <Grid container
               direction="column"
               alignItems="stretch"
@@ -140,40 +218,68 @@ const BetView = (props) => {
                 <Grid container
                   direction="column"
                   justify='center'
-                  alignItems='center'
+                  alignItems='stretch'
                   >
-                  <Grid item>
-                    <Typography variant="body1">{props.bet.title}</Typography>
-                  </Grid>
-                  <Grid item>
-                    <Typography variant="body2">{props.bet.description}</Typography>
-                  </Grid>
+                    <Grid item>
+                      <Grid container
+                        direction='row'
+                        justify='space-between'
+                        alignItems='center'>
+                        <Grid item xs={2} sm={1}>
+                        
+                        </Grid>
+                        <Grid item xs={8} sm={10}>
+                          <Grid container 
+                            direction='column'
+                            justify='center'
+                            alignItems='center'>
+                            <Grid item >
+                              <Typography variant="h5">{props.bet.title}</Typography>
+                            </Grid>
+                            <Grid item >
+                              <Typography variant="body2">{props.bet.description}</Typography>
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                        <Grid item xs={2} sm={1}>
+                          <Grid container
+                            justify='flex-start'
+                            alignItems='flex-end'>
+                            <Grid container
+                            direction='column'
+                            justify='center'
+                            alignItems='center'>
+                              <Grid item>
+                                {renderCaptainButtons()}
+                              </Grid>
+                              <Grid item>
+                                {props.bet.state==='OPEN'?<Typography variant="body2">Total: {props.players.length}</Typography>:<div/>}
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </Grid>
                 </Grid>
               </Grid>
               <Grid item>
                 <Grid container
-                      direction="row"
-                      alignItems="stretch"
-                      justify="space-evenly"
-                      >
-                  <Paper elevation={3} style={props.style}>
-                    <Grid item>
-                        {renderOptions(props.bet.choiceA)}
-                    </Grid>
-                  </Paper>
-                  <Paper elevation={3} style={props.style}>
-                    <Grid item>
-                        {renderOptions(props.bet.choiceB)}
-                    </Grid>
-                  </Paper>
-                </Grid>
-                  <Grid container
+                    direction="row"
                     alignItems="center"
-                    justify="center">
-                    <Grid item>
-                      {renderCaptainButtons()}
-                    </Grid>
+                    spacing={2}
+                    justify="space-evenly"
+                    >
+                  <Grid item xs={12} sm={5}>
+                    <Paper elevation={3} style={props.style}>
+                      {renderOptions(props.bet.choiceA)}
+                    </Paper>
                   </Grid>
+                  <Grid item xs={12} sm={5}>
+                    <Paper elevation={3} style={props.style}>
+                      {renderOptions(props.bet.choiceB)}
+                    </Paper>
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>

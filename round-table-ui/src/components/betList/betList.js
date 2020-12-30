@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styles from './betList.module.css';
 import { Typography, Grid, Paper, Container } from '@material-ui/core';
 import BetView from '../betView/betView';

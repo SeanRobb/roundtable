@@ -1,5 +1,4 @@
 import React, { useState }  from 'react';
-import PropTypes from 'prop-types';
 import styles from './addOptionPopUp.module.css';
 import { Box, Dialog, DialogTitle, FormControl,InputLabel,Input, Grid, Button, DialogContentText } from '@material-ui/core';
 import {createOption} from '../../utils/index';
@@ -43,9 +42,9 @@ const AddOptionPopUp = (props) => {
             <Grid item>
               <FormControl
                 fullWidth={true}>
-                <InputLabel htmlFor="title">Title</InputLabel>
+                <InputLabel htmlFor="event">Event</InputLabel>
                 <Input 
-                  id="title" 
+                  id="event" 
                   value={title} 
                   onChange={(event)=>setTitle(event.target.value)}
                   fullWidth={true}
@@ -55,7 +54,7 @@ const AddOptionPopUp = (props) => {
             <Grid item>
               <FormControl
                 fullWidth={true}>
-                <InputLabel htmlFor="description">Description</InputLabel>
+                <InputLabel htmlFor="description">Bet Description</InputLabel>
                 <Input 
                   id="description" 
                   value={description} 

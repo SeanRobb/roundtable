@@ -1,30 +1,47 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styles from './leaderboard.module.css';
-import { Typography, Grid, Paper, Container } from '@material-ui/core';
-import Player from '../player/player';
+import { Typography, Grid, Paper } from '@material-ui/core';
 
-const Leaderboard = (props) => (
+const Leaderboard = (props) => {
+  const getVariant = (index) => {
+    if (index === 0 ) {
+      return 'h4';
+    }
+    return 'h6'
+  }
+  const getPlayer = (player, index) =>{
+    return (
+      <Grid item key={player.name}>
+        <Typography align='left' variant={getVariant(index)}>{index+1}: {player.name} - {player.points}</Typography>
+      </Grid>
+    );
+  }
+  return (
   <div className={styles.leaderboard} data-testid="Leaderboard">
     <Paper style={{height:'100%', padding:'5px'}} elevation={1}>
-      <Grid container spacing={2} 
-                direction="column"
-                alignItems="center"
-                justify="space-evenly"
+      <Grid container
+        direction="column"
+        alignItems="center"
+        justify="space-evenly"
                 >
           <Grid item>
-            <Typography variant="h3">Leaderboard:</Typography>
-            {props.leaderboard
-              .map((player, index)=>
-              <Grid item key={player.name}>
-                <Typography variant={index==0?"h4":"h6"}>{index+1}: {player.name} - {player.points}</Typography>
-              </Grid>
-            )}
+            <Typography variant="h2">Leaderboard:</Typography>
           </Grid>
+          <Grid item>
+            <Grid container
+            direction='column'
+            alignItems='flex-start'>
+              {props.leaderboard
+                .map((player, index)=>
+                getPlayer(player,index)
+              )}
+            </Grid>
+          </Grid>
+
       </Grid>
     </Paper>
   </div>
-);
+)};
 
 Leaderboard.propTypes = {};
 
