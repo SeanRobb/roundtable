@@ -65,6 +65,7 @@ const NextRoundPlayroom = (props) => {
       description:option.description,
       choiceA:option.choiceA,
       choiceB:option.choiceB,
+      link:option.link,
     })
     console.log(option);
     setState({
@@ -163,6 +164,7 @@ const NextRoundPlayroom = (props) => {
       description={option.description}
       choiceA={option.choiceA}
       choiceB={option.choiceB}
+      link={option.link}
       onClose={toggleAddOptionsPopup}
     />
 

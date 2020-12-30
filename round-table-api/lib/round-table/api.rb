@@ -216,7 +216,7 @@ module RoundTable
       "Id: #{id} Roster: #{roster} options: #{options}"
     end
     class Bet 
-      attr_accessor :id, :title, :description, :choiceA, :choiceB, :created, :state, :correctChoice
+      attr_accessor :id, :title, :description, :choiceA, :choiceB, :created, :state, :correctChoice, :link
       def initialize(params={})
         @id=params.fetch(:id, SecureRandom.uuid)
         @title=params.fetch(:title).strip
@@ -226,6 +226,7 @@ module RoundTable
         @created=params.fetch(:created,Time.now.getutc)
         @state=params.fetch(:state, "OPEN")
         @correctChoice=params.fetch(:correctChoice, "").strip
+        @link=params.fetch(:link,"").strip
       end
       def open
         @state="OPEN"
@@ -258,6 +259,7 @@ module RoundTable
           :created => @created.to_i,
           :correctChoice => @correctChoice,
           :state => @state,
+          :link=>@link,
         }
       end
       def as_json(options={})
@@ -269,7 +271,8 @@ module RoundTable
           choiceA: @choiceA,
           choiceB: @choiceB,
           correctChoice: @correctChoice,
-          state: @state
+          state: @state,
+          link: @link,
         }
       end
       def to_json(*options)
@@ -277,20 +280,23 @@ module RoundTable
       end
     end
     class Option
-      attr_accessor :id, :title, :description, :choiceA, :choiceB
+      attr_accessor :id, :title, :description, :choiceA, :choiceB, :link
       def initialize(params={})
         @id=params.fetch(:id, SecureRandom.uuid)
         @title=params.fetch(:title).strip
         @description=params.fetch(:description).strip
         @choiceA=params.fetch(:choiceA).strip
         @choiceB=params.fetch(:choiceB).strip
+        @link=params.fetch(:link,"").strip
       end
       def to_bet
         RoundTable::NextRoundGameroom::Bet.new(
           title:@title,
           description:@description,
           choiceA:@choiceA,
-          choiceB:@choiceB)
+          choiceB:@choiceB,
+          link:@link
+        )
       end
       def to_h(*options)
         {
@@ -299,6 +305,7 @@ module RoundTable
           :description => @description,
           :choiceA => @choiceA,
           :choiceB => @choiceB,
+          :link=> @link,
         }
       end
       def as_json(options={})
@@ -308,6 +315,7 @@ module RoundTable
           description: @description,
           choiceA: @choiceA,
           choiceB: @choiceB,
+          link: @link,
         }
       end
       def to_json(*options)

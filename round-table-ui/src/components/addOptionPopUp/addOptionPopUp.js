@@ -9,6 +9,7 @@ const AddOptionPopUp = (props) => {
   const [description, setDescription] = useState("");
   const [choiceA, setChoiceA] = useState("");
   const [choiceB, setChoiceB] = useState("");
+  const [link, setLink] = useState("");
 
   // Update State when props change
   useEffect(() => {
@@ -26,17 +27,21 @@ const AddOptionPopUp = (props) => {
   useEffect(() => {
     setChoiceB(props.choiceB)
   },[props.choiceB])
+  useEffect(() => {
+    setLink(props.link)
+  },[props.link])
 
   const clearForm=()=>{
     setTitle("")
     setDescription("")
     setChoiceA("")
     setChoiceB("")
+    setLink("")
   };
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    createOption(props.gameId,{title,description,choiceA,choiceB})
+    createOption(props.gameId,{title,description,choiceA,choiceB,link})
     clearForm();
     props.onClose()
   }
@@ -119,6 +124,18 @@ const AddOptionPopUp = (props) => {
               </Grid>
             </Grid>
             <Grid item>
+              <FormControl
+                fullWidth={true}>
+                <InputLabel htmlFor="link">External Link</InputLabel>
+                <Input 
+                  id="link" 
+                  value={link} 
+                  onChange={(event)=>setLink(event.target.value)}
+                  fullWidth={true}
+                  />
+              </FormControl>
+            </Grid>
+            <Grid item>
               <div style={{padding:'15px'}}/>
             </Grid>
             <Grid item>
@@ -149,6 +166,7 @@ AddOptionPopUp.propTypes = {
   description:PropTypes.string,
   choiceA:PropTypes.string,
   choiceB:PropTypes.string,
+  link:PropTypes.string,
 };
 
 AddOptionPopUp.defaultProps = {
@@ -157,6 +175,7 @@ AddOptionPopUp.defaultProps = {
   description:"",
   choiceA:"",
   choiceB:"",
+  link:"",
 };
 
 export default AddOptionPopUp;

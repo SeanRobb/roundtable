@@ -38,6 +38,9 @@ const BetView = (props) => {
     return playersThatSelected(selection).includes(props.role.player.name);
   } 
   const isCorrectSelection = (selection) =>{
+    if (props.bet.correctChoice === ""){
+      return false;
+    }
     return props.bet.correctChoice === selection
   }
 
@@ -299,7 +302,11 @@ const BetView = (props) => {
                   </Grid> 
                   <Grid item>
                   <IconButton 
-                      disabled={true}
+                      disabled={props.bet.link === ""}
+                      onClick={()=>{
+                        var win = window.open(props.bet.link, '_blank');
+                        win.focus();
+                      }}
                     ><LaunchIcon/></IconButton>
                   </Grid>               
                 </Grid>
