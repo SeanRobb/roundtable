@@ -52,6 +52,7 @@ return (
                     onClose={handleClose}
                   >
                     <MenuItem onClick={makeBet}>Make Bet</MenuItem>
+                    <MenuItem onClick={()=>props.editOption(option)}>Edit Option</MenuItem>
                     <MenuItem onClick={deleteOptionClick}>Delete Option</MenuItem>
                   </Menu>
                   

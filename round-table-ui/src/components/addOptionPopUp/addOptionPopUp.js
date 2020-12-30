@@ -1,4 +1,5 @@
-import React, { useState }  from 'react';
+import React, { useState, useEffect }  from 'react';
+import PropTypes from 'prop-types';
 import styles from './addOptionPopUp.module.css';
 import { Box, Dialog, DialogTitle, FormControl,InputLabel,Input, Grid, Button, DialogContentText } from '@material-ui/core';
 import {createOption} from '../../utils/index';
@@ -9,13 +10,34 @@ const AddOptionPopUp = (props) => {
   const [choiceA, setChoiceA] = useState("");
   const [choiceB, setChoiceB] = useState("");
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    createOption(props.gameId,{title,description,choiceA,choiceB})
+  // Update State when props change
+  useEffect(() => {
+    setTitle(props.title)
+  },[props.title])
+
+  useEffect(() => {
+    setDescription(props.description)
+  },[props.description])
+
+  useEffect(() => {
+    setChoiceA(props.choiceA)
+  },[props.choiceA])
+
+  useEffect(() => {
+    setChoiceB(props.choiceB)
+  },[props.choiceB])
+
+  const clearForm=()=>{
     setTitle("")
     setDescription("")
     setChoiceA("")
     setChoiceB("")
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    createOption(props.gameId,{title,description,choiceA,choiceB})
+    clearForm();
     props.onClose()
   }
   return (
@@ -45,6 +67,7 @@ const AddOptionPopUp = (props) => {
                 <InputLabel htmlFor="event">Event</InputLabel>
                 <Input 
                   id="event" 
+                  defaultValue={props.title}
                   value={title} 
                   onChange={(event)=>setTitle(event.target.value)}
                   fullWidth={true}
@@ -96,11 +119,19 @@ const AddOptionPopUp = (props) => {
               </Grid>
             </Grid>
             <Grid item>
+              <div style={{padding:'15px'}}/>
+            </Grid>
+            <Grid item>
               <Grid container
-                justify='flex-end'
+                justify='space-between'
                 >
                 <Grid item>
-                  <Button type="submit">
+                  <Button variant="contained" color="secondary" onClick={clearForm}>
+                    Clear
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button variant="contained" color="primary" type="submit">
                     Submit
                   </Button>
                 </Grid>
@@ -112,8 +143,20 @@ const AddOptionPopUp = (props) => {
     </Dialog>
 )};
 
-AddOptionPopUp.propTypes = {};
+AddOptionPopUp.propTypes = {
+  gameId:PropTypes.string,
+  title:PropTypes.string,
+  description:PropTypes.string,
+  choiceA:PropTypes.string,
+  choiceB:PropTypes.string,
+};
 
-AddOptionPopUp.defaultProps = {};
+AddOptionPopUp.defaultProps = {
+  gameId:"",
+  title:"",
+  description:"",
+  choiceA:"",
+  choiceB:"",
+};
 
 export default AddOptionPopUp;

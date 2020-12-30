@@ -14,7 +14,7 @@ const AddBetPopUp = (props) => {
         <DialogTitle>
           Add Bet
         </DialogTitle>
-        <OptionList gameId={props.gameId} options={props.options} />
+        <OptionList gameId={props.gameId} options={props.options} editOption={props.editOption} />
       </Box>  
     </Dialog>
 )};

@@ -24,6 +24,13 @@ const NextRoundPlayroom = (props) => {
     showAddBetPopUp:false
   });
 
+  const [option, setOption] = useState({
+    title:"",
+    description:"",
+    choiceA:"",
+    choiceB:"",
+  });
+
 
   function toggleClosedBetsPopup() {  
     setState({
@@ -37,6 +44,12 @@ const NextRoundPlayroom = (props) => {
       ...state,
       showAddOptionPopUp: !state.showAddOptionPopUp, 
     });  
+    setOption({
+      title:"",
+      description:"",
+      choiceA:"",
+      choiceB:"",
+    })
   }; 
 
   function toggleAddBetPopup() {  
@@ -45,6 +58,21 @@ const NextRoundPlayroom = (props) => {
       showAddBetPopUp: !state.showAddBetPopUp, 
     });  
   }; 
+
+  function editOptionClick(option) {
+    setOption({
+      title:option.title,
+      description:option.description,
+      choiceA:option.choiceA,
+      choiceB:option.choiceB,
+    })
+    console.log(option);
+    setState({
+      ...state,
+      showAddOptionPopUp:true,
+    })
+
+  }
 
   return (
   <div className={styles.nextroundPlayroom} data-testid="nextroundPlayroom">
@@ -83,10 +111,10 @@ const NextRoundPlayroom = (props) => {
                               spacing={1}
                             >
                           <Grid item>
-                            <LinkIcon/>
+                            <Typography variant='body2'>{props.state.game.id}</Typography>
                           </Grid>
                           <Grid item>
-                            <Typography variant='body2'>{props.state.game.id}</Typography>
+                            <LinkIcon/>
                           </Grid>
                         </Grid>
                         </Link>
@@ -124,12 +152,17 @@ const NextRoundPlayroom = (props) => {
       open={state.showAddBetPopUp}
       options={props.state.game.options}
       gameId={props.state.game.id}
+      editOption={editOptionClick}
       onClose={toggleAddBetPopup}
     />
 
     <AddOptionPopUp 
       open={state.showAddOptionPopUp}
       gameId={props.state.game.id}
+      title={option.title}
+      description={option.description}
+      choiceA={option.choiceA}
+      choiceB={option.choiceB}
       onClose={toggleAddOptionsPopup}
     />
 
