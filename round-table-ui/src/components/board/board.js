@@ -23,18 +23,27 @@ const Board = () => {
       id: game.toUpperCase(),
       created: null,
       roster: [],
-      location: { day: 0, time: 'night' },
       hasStarted: false,
       isFinished: false,
-      winner: ''
     },
-    results: [],
     waitingroom: {
       description: "Loading",
       canStart: false
     },
-    role: ""
+    role: {}
   });
+
+  const onSuccess =(data) => {
+    setState(data);
+    setPageState({...state,isLoading:false});
+    return true;
+  }
+
+  const onFailure= (error) =>{
+    setPageState({isLoading:false});
+    console.log('handle failure');
+    console.log(error);
+  }
 
   return (
   <div className={styles.board} data-testid="board">
@@ -43,27 +52,17 @@ const Board = () => {
       headers={getHeaders()}
       interval= {3000} // in milliseconds(ms)
       retryCount={3} // this is optional
-      onSuccess={(data) => {
-        setState(data);
-        setPageState({isLoading:false});
-        return true;
-      }}
-      onFailure={() => {
-        setPageState({isLoading:false});
-        console.log('handle failure');
-      }} // this is optional
+      onSuccess={onSuccess}
+      onFailure={onFailure}
       method={'GET'}
       render={({ startPolling, stopPolling, isPolling }) => {
         return (
-          <div>
-
-            <div> 
-              {state.game.hasStarted?
-                state.game.hasFinished?
-                <GameOverRoom game={state.game} />:
-                  <Playroom state={state} />:
-                <WaitingRoom state={state.game} waitingroom={state.waitingroom}/>}
-            </div>
+          <div> 
+            {state.game.hasStarted?
+              state.game.hasFinished?
+              <GameOverRoom game={state.game} />:
+                <Playroom state={state} />:
+              <WaitingRoom state={state.game} waitingroom={state.waitingroom}/>}
           </div>
         );
       }}

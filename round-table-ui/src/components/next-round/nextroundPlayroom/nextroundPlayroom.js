@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from "react-router-dom";
 import * as R from 'ramda';
 import styles from './nextroundPlayroom.module.css';
@@ -17,11 +17,18 @@ import History from '@material-ui/icons/History';
 import Add from '@material-ui/icons/Add';
 import BetBreakdownPopup from '../betBreakdownPopup/betBreakdownPopup';
 
-import {getPlayersForBet} from '../../../utils/index'
+import { useSnackbar } from 'notistack';
+
+import {getPlayersForBet,enableNotifications,checkNotificationPromise} from '../../../utils/index'
 
 
 const NextRoundPlayroom = (props) => {
+  enableNotifications();
+
   const currentHistory = useHistory();
+
+  const { enqueueSnackbar } = useSnackbar();
+
   const [state, setState] = useState({
     showClosedBetsPopUp: false,
     showAddOptionPopUp:false,
@@ -46,6 +53,10 @@ const NextRoundPlayroom = (props) => {
     choiceB:"",
     link:"",
   });
+
+  const [bets,setBets] = useState(undefined);
+
+  const [options,setOptions] = useState(undefined);
 
   function toggleClosedBetsPopup() {  
     setState({
@@ -111,7 +122,89 @@ const NextRoundPlayroom = (props) => {
       showAddOptionPopUp:true,
     })
 
+  };
+
+  function notify(title, body) {
+    enqueueSnackbar(title,{ 
+      variant: 'info',
+    });
+    if (checkNotificationPromise()){
+      var notification = new Notification(title, { body: body});
+    }
   }
+
+  useEffect(() => {
+    setBets(props.state.game.bets);
+
+    //to prevent startup messages
+    if (bets === undefined){
+      return ;
+    }
+
+    let opened=[];
+    let frozen=[];
+    let closed=[];
+
+    props.state.game.bets.forEach((x) => {
+      let match = bets.find((y)=>{
+        return x.id === y.id && x.state == y.state;        
+      });
+      if (match === undefined) {
+        switch(x.state) {
+          case 'OPEN': opened.push(x); break;
+          case 'CLOSED': closed.push(x); break;
+          case 'FROZEN': frozen.push(x); break;
+        }
+      }
+    });
+    if (opened.length === 1) {
+      notify('New bet has been opened!', 'Place your selection before it freezes.');
+    }
+    if (opened.length > 1) {
+      notify(opened.length + ' new bets have been opened!', 'Place your selection before it freezes.');
+    }
+
+    if (frozen.length === 1) {
+      notify('Bet has been frozen!', 'Let\'s see where everyone has their bet.');
+    }
+    if (frozen.length > 1) {
+      notify(frozen.length + ' bets have been frozen!', 'Let\'s see where everyone has their bet.');
+    }
+
+    if (closed.length === 1) {
+      notify('Bet has been closed!', 'Did you win a point?');
+    }
+    if (closed.length > 1) {
+      notify(closed.length + ' bets have been closed!', 'Did you win some points?');
+    }
+
+    setBets(props.state.game.bets);
+  },[props.state.game.bets])
+
+  useEffect(() => {
+    // only for captains
+    setOptions(props.state.game.options);
+
+    //to prevent startup messages
+    if (options === undefined){
+      return ;
+    }
+    if (props.state.role.name === 'Captain'){
+      let newOptions = props.state.game.options.filter((x) => {
+        let match = options.find((y)=>{
+          return x.id === y.id && x.state == y.state;        
+        });
+        return match === undefined;
+      });
+      if (newOptions.length === 1) {
+        notify('New option has been created', 'Want to activate some bets?');
+      }
+      if (newOptions.length > 1) {
+        notify(newOptions.length + ' new options have been created', 'Want to activate some bets?');
+      }
+      setOptions(props.state.game.options);
+    }
+  },[props.state.game.options])
 
   return (
   <div className={styles.nextroundPlayroom} data-testid="nextroundPlayroom">
@@ -247,7 +340,8 @@ const NextRoundPlayroom = (props) => {
           </>  
       }
     </Grid>
-  </div>);
+  </div>
+  );
 };
 
 NextRoundPlayroom.propTypes = {};

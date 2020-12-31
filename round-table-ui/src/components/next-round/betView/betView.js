@@ -11,8 +11,13 @@ import PollIcon from '@material-ui/icons/Poll';
 import {selectBet,freezeBet,closeBet} from '../../../utils/index';
 import * as R from 'ramda';
 
+import { useSnackbar } from 'notistack';
+
 
 const BetView = (props) => {
+
+  const { enqueueSnackbar } = useSnackbar();
+
   const getPlayerSelection = () => {
     if (props.role.player===undefined){
       return "";
@@ -105,10 +110,20 @@ const BetView = (props) => {
               selectBet(props.gameId, props.bet.id, selection)
                 .then(()=>
                 {
+                  enqueueSnackbar(selection +' selected',{ 
+                    variant: 'success',
+                  });
                   setTimeout(()=>{
                     setLoading(false);
                     setSuccess(true);
                   }, 500);
+                })
+                .catch((error)=>{
+                  enqueueSnackbar('Failed to submit selection',{ 
+                    variant: 'error',
+                  });
+                  setLoading(false);
+                  setSuccess(false);
                 });
             }}>
               <Grid container
