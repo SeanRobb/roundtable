@@ -19,11 +19,12 @@ import BetBreakdownPopup from '../betBreakdownPopup/betBreakdownPopup';
 
 import { useSnackbar } from 'notistack';
 
-import {getPlayersForBet} from '../../../utils/index'
+import {getPlayersForBet,enableNotifications,checkNotificationPromise} from '../../../utils/index'
 
 
 const NextRoundPlayroom = (props) => {
-  Notification.requestPermission();
+  enableNotifications();
+
   const currentHistory = useHistory();
 
   const { enqueueSnackbar } = useSnackbar();
@@ -124,8 +125,12 @@ const NextRoundPlayroom = (props) => {
   };
 
   function notify(title, body) {
-    enqueueSnackbar(title);
-    var notification = new Notification(title, { body: body});
+    enqueueSnackbar(title,{ 
+      variant: 'info',
+    });
+    if (checkNotificationPromise()){
+      var notification = new Notification(title, { body: body});
+    }
   }
 
   useEffect(() => {

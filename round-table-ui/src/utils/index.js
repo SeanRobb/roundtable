@@ -1,6 +1,28 @@
 import jwt from 'jwt-decode';
 import { config } from './constants'
 
+const enableNotifications =() =>{
+  if (!('Notification' in window)) {
+    console.log("This browser does not support notifications.");
+  } else {
+    try {
+      Notification.requestPermission();
+    } catch(e) {
+      console.log("This browser does not support notifications.");
+    }
+  }
+}
+
+function checkNotificationPromise() {
+  try {
+    Notification.requestPermission().then();
+  } catch(e) {
+    return false;
+  }
+
+  return true;
+}
+
 const registerUser = (gameId,userId) =>{
   const requestOptions = {
     method: 'POST',
@@ -158,6 +180,8 @@ const isUserRegistered = () => {
 }
 
 export { 
+  enableNotifications,
+  checkNotificationPromise,
   createGameRoom,
   registerUser,
   startGame,
