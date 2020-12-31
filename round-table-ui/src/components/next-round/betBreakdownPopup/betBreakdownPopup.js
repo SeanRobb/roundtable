@@ -4,7 +4,7 @@ import styles from './betBreakdownPopup.module.css';
 import { Box, Dialog, DialogTitle, Typography, Grid, DialogContentText, IconButton, Paper } from '@material-ui/core';
 import LaunchIcon from '@material-ui/icons/Launch';
 import Grade from '@material-ui/icons/Grade';
-import Player from '../player/player';
+import Player from '../../player/player';
 
 const BetBreakdownPopup = (props) => {
   const playersThatSelected = (selection) => {

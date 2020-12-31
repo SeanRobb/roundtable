@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from "react-router-dom";
 import * as R from 'ramda';
 import styles from './nextroundPlayroom.module.css';
-import Player from '../player/player';
+import Player from '../../player/player';
 import { Typography, Grid, Paper, Container, Button, Fab,Link }  from '@material-ui/core';
 import Leaderboard from '../leaderboard/leaderboard';
 import BetList from '../betList/betList';
@@ -17,7 +17,7 @@ import History from '@material-ui/icons/History';
 import Add from '@material-ui/icons/Add';
 import BetBreakdownPopup from '../betBreakdownPopup/betBreakdownPopup';
 
-import {getPlayersForBet} from '../../utils/index'
+import {getPlayersForBet} from '../../../utils/index'
 
 
 const NextRoundPlayroom = (props) => {

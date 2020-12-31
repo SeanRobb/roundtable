@@ -4,7 +4,7 @@ import {
   useParams
 } from "react-router-dom";
 import ReactPolling from 'react-polling';
-import WaitingRoom from '../waitingRoom/waitingRoom';
+import WaitingRoom from '../waitingRoom/waitingRoom/waitingRoom';
 import Playroom from '../playroom/playroom';
 import GameOverRoom from '../gameOverRoom/gameOverRoom';
 import {getHeaders} from '../../utils/index';

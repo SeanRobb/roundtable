@@ -2,7 +2,7 @@ import React, { useState, useEffect }  from 'react';
 import PropTypes from 'prop-types';
 import styles from './addOptionPopUp.module.css';
 import { Box, Dialog, DialogTitle, FormControl,InputLabel,Input, Grid, Button, DialogContentText } from '@material-ui/core';
-import {createOption} from '../../utils/index';
+import {createOption} from '../../../utils/index';
 
 const AddOptionPopUp = (props) => {
   const [title, setTitle] = useState("");

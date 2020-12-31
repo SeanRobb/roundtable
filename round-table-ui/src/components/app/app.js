@@ -1,18 +1,15 @@
-import React, { useState }  from 'react';
+import React from 'react';
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Link,
-  NavLink
 } from "react-router-dom";
 import Home from '../home/home';
 import Register from '../register/register';
 import Board from '../board/board';
 import './app.css';
-import {getUsername} from '../../utils/index';
-import Player from '../player/player';
-import {AppBar, Toolbar,Typography,Avatar, Button, Grid } from '@material-ui/core';  
+import {AppBar, Toolbar,Typography, Grid } from '@material-ui/core';  
 
 function App() {
 

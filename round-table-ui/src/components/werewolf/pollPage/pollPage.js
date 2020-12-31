@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './pollPage.module.css';
 import { List, ListItem, Typography, Paper, Grid } from '@material-ui/core';
-import Player from '../player/player';
+import Player from '../../player/player';
 
 
 const PollPage = (props) => (

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './villagerOverview.module.css';
 import { Typography, Avatar, Paper, Grid } from '@material-ui/core';
-import Player from '../player/player';
+import Player from '../../player/player';
 
 const VillagerOverview = (props) => (
   <Paper elevation={1} style={props.style}>
