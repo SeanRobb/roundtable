@@ -1,7 +1,7 @@
 import React, { useState }  from 'react';
 import styles from './optionList.module.css';
 import { Typography, Grid, Paper, Button, Menu, MenuItem } from '@material-ui/core';
-import {createBet,deleteOption} from '../../utils/index';
+import {createBet,deleteOption} from '../../../utils/index';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';

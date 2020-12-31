@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './waitingRoom.module.css';
 import { useHistory } from "react-router-dom";
-import Player from '../player/player';
-import {startGame} from '../../utils/index';
+import Player from '../../player/player';
+import {startGame} from '../../../utils/index';
 import Button from '@material-ui/core/Button';  
 import { Container, Grid, Typography, Paper } from '@material-ui/core';
 

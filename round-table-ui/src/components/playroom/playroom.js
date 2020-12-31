@@ -1,7 +1,7 @@
 import React, { useState }  from 'react';
 import styles from './playroom.module.css';
-import WerewolfPlayroom from '../werewolfPlayroom/werewolfPlayroom';
-import NextRoundPlayroom from '../nextroundPlayroom/nextroundPlayroom';
+import WerewolfPlayroom from '../werewolf/werewolfPlayroom/werewolfPlayroom';
+import NextRoundPlayroom from '../next-round/nextroundPlayroom/nextroundPlayroom';
 
 
 const Playroom = (props) => {

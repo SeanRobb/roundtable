@@ -8,7 +8,7 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import PlusOneIcon from '@material-ui/icons/PlusOne';
 import PollIcon from '@material-ui/icons/Poll';
-import {selectBet,freezeBet,closeBet} from '../../utils/index';
+import {selectBet,freezeBet,closeBet} from '../../../utils/index';
 import * as R from 'ramda';
 
 

@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './betList.module.css';
 import { Typography, Grid, Paper, Container } from '@material-ui/core';
 import BetView from '../betView/betView';
-import {getPlayersForBet} from '../../utils/index'
+import {getPlayersForBet} from '../../../utils/index'
 
 const BetList = (props) => {
   const renderBets = (state) => {
