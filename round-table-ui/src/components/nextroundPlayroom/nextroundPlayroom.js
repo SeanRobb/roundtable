@@ -15,22 +15,37 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import LinkIcon from '@material-ui/icons/Link';
 import History from '@material-ui/icons/History';
 import Add from '@material-ui/icons/Add';
+import BetBreakdownPopup from '../betBreakdownPopup/betBreakdownPopup';
+
+import {getPlayersForBet} from '../../utils/index'
+
 
 const NextRoundPlayroom = (props) => {
   const currentHistory = useHistory();
   const [state, setState] = useState({
     showClosedBetsPopUp: false,
     showAddOptionPopUp:false,
-    showAddBetPopUp:false
+    showAddBetPopUp:false,
+    showBetBreakdownPopUp:false,
   });
 
   const [option, setOption] = useState({
+    id:"",
     title:"",
     description:"",
     choiceA:"",
     choiceB:"",
+    link:"",
   });
 
+  const [bet, setBet] = useState({
+    id:"",
+    title:"",
+    description:"",
+    choiceA:"",
+    choiceB:"",
+    link:"",
+  });
 
   function toggleClosedBetsPopup() {  
     setState({
@@ -39,16 +54,38 @@ const NextRoundPlayroom = (props) => {
     });  
   }; 
 
+  function toggleBetBreakdownPopup(bet) {
+    if (bet!== undefined){
+      console.log(bet);
+      setBet(bet);
+    } else{
+      setBet({
+        id:"",
+        title:"",
+        description:"",
+        choiceA:"",
+        choiceB:"",
+        link:"",
+      })
+    }
+    setState({
+      ...state,
+      showBetBreakdownPopUp: !state.showBetBreakdownPopUp, 
+    });  
+  }
+
   function toggleAddOptionsPopup() {  
     setState({
       ...state,
       showAddOptionPopUp: !state.showAddOptionPopUp, 
     });  
     setOption({
+      id:"",
       title:"",
       description:"",
       choiceA:"",
       choiceB:"",
+      link:"",
     })
   }; 
 
@@ -61,6 +98,7 @@ const NextRoundPlayroom = (props) => {
 
   function editOptionClick(option) {
     setOption({
+      id:option.id,
       title:option.title,
       description:option.description,
       choiceA:option.choiceA,
@@ -138,16 +176,25 @@ const NextRoundPlayroom = (props) => {
           <Leaderboard leaderboard={props.state.leaderboard} />
         </Grid>
         <Grid item xs={12}>
-          <BetList gameId={props.state.game.id} role={props.state.role} bets={props.state.game.bets} roster={props.state.game.roster}/>
+          <BetList gameId={props.state.game.id} role={props.state.role} bets={props.state.game.bets} roster={props.state.game.roster} toggleBetBreakdown={toggleBetBreakdownPopup}/>
         </Grid>
     </Grid>
     <div style={{height:120}} />
+
     <ClosedBetsPopUp 
       open={state.showClosedBetsPopUp}
       roster={props.state.game.roster}
       bets={props.state.game.bets}
       role={props.state.role}
+      toggleBetBreakdown={toggleBetBreakdownPopup}
       onClose={toggleClosedBetsPopup}
+    />
+
+    <BetBreakdownPopup 
+      open={state.showBetBreakdownPopUp}
+      players={getPlayersForBet(props.state.game.roster,bet)}
+      bet={bet}
+      onClose={()=>toggleBetBreakdownPopup()}
     />
     <AddBetPopUp 
       open={state.showAddBetPopUp}

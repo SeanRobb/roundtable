@@ -38,7 +38,7 @@ const ClosedBetsPopUp = (props) => {
                 return (
                   <Grid item 
                   key={bet.id}>
-                    <BetView bet={bet} role={props.role} players={players}></BetView>
+                    <BetView bet={bet} role={props.role} players={players} toggleBetBreakdown={props.toggleBetBreakdown}></BetView>
                   </Grid>
                 );
               }

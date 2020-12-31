@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './betList.module.css';
 import { Typography, Grid, Paper, Container } from '@material-ui/core';
 import BetView from '../betView/betView';
+import {getPlayersForBet} from '../../utils/index'
 
 const BetList = (props) => {
   const renderBets = (state) => {
@@ -17,19 +18,13 @@ const BetList = (props) => {
               bet={bet} 
               players={players} 
               role={props.role}
+              toggleBetBreakdown={props.toggleBetBreakdown}
             />
           </Grid>
         );
       })
   }
-  const getPlayersForBet=(roster,bet) => {
-    let test = roster.map((player)=> player.betsPlaced.map((playerBet) => {
-      if(playerBet.id == bet.id){
-        return {"name":player.name,"selection":playerBet.selection};
-      }
-    }).filter(x => x !== undefined)).filter((x)=> x.length != 0);
-    return test.flat(1);
-  }
+
   return (
   <div className={styles.betList} data-testid="betList">
     <Paper style={{height:'100%', padding:'5px'}} elevation={1}>

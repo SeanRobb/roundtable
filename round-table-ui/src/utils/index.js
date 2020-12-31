@@ -101,6 +101,15 @@ const deleteOption = (gameId, optionid) => {
     .then((res) => res.json());
 };
 
+const getPlayersForBet=(roster,bet) => {
+  let test = roster.map((player)=> player.betsPlaced.map((playerBet) => {
+    if(playerBet.id == bet.id){
+      return {"name":player.name,"selection":playerBet.selection};
+    }
+  }).filter(x => x !== undefined)).filter((x)=> x.length != 0);
+  return test.flat(1);
+}
+
 const startGame = (gameId) =>{
   const requestOptions = {
     method: 'POST',
@@ -159,6 +168,7 @@ export {
   freezeBet,
   createOption,
   deleteOption,
+  getPlayersForBet, 
   getHeaders,
   getUsername,
   clearUsername,

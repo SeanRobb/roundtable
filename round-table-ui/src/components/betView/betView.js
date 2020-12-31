@@ -7,6 +7,7 @@ import AcUnitIcon from '@material-ui/icons/AcUnit';
 import LaunchIcon from '@material-ui/icons/Launch';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import PlusOneIcon from '@material-ui/icons/PlusOne';
+import PollIcon from '@material-ui/icons/Poll';
 import {selectBet,freezeBet,closeBet} from '../../utils/index';
 import * as R from 'ramda';
 
@@ -34,6 +35,7 @@ const BetView = (props) => {
   const playersThatSelected = (selection) => {
     return props.players.filter((player) => player.selection == selection).map((player)=> player.name)
   }
+
   const didPlayerMakeSelection = (selection) =>{
     if (!isUserRegistered()){
       return false;
@@ -183,6 +185,7 @@ const BetView = (props) => {
           <Button 
           variant="contained"
           fullWidth={true}
+          disabled={true}
           disableRipple={true}
           >
           <Grid container
@@ -304,14 +307,26 @@ const BetView = (props) => {
                     {<Typography variant="body2">Bets placed: {props.players.length}</Typography>}
                   </Grid> 
                   <Grid item>
-                  <IconButton 
-                      disabled={props.bet.link === ""}
-                      onClick={()=>{
-                        var win = window.open(props.bet.link, '_blank');
-                        win.focus();
-                      }}
-                    ><LaunchIcon/></IconButton>
-                  </Grid>               
+                    <Grid container
+                      justify='flex-end'
+                      alignItems='flex-end'>
+                      <Grid item>
+                        {props.bet.state==='OPEN'?<div/>:<IconButton 
+                          onClick={()=> props.toggleBetBreakdown(props.bet)}>
+                          <PollIcon/>
+                        </IconButton>}
+                      </Grid>
+                      <Grid item>
+                      <IconButton 
+                          disabled={props.bet.link === ""}
+                          onClick={()=>{
+                            var win = window.open(props.bet.link, '_blank');
+                            win.focus();
+                          }}
+                        ><LaunchIcon/></IconButton>
+                      </Grid>  
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
