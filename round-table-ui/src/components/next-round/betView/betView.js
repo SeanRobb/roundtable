@@ -13,6 +13,8 @@ import * as R from 'ramda';
 
 import { useSnackbar } from 'notistack';
 
+const clearedSelection = "";
+
 
 const BetView = (props) => {
 
@@ -29,7 +31,7 @@ const BetView = (props) => {
     return player.selection;
   }
 
-  const [state, setState] = useState({selection:getPlayerSelection(),isCaptain:props.role.name == "Captain"});
+  const [state, setState] = useState({selection:props.bet.state === 'FROZEN'?'':getPlayerSelection(),isCaptain:props.role.name === "Captain"});
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(true);
@@ -38,7 +40,7 @@ const BetView = (props) => {
     return !R.isEmpty(props.role)
   }
   const playersThatSelected = (selection) => {
-    return props.players.filter((player) => player.selection == selection).map((player)=> player.name)
+    return props.players.filter((player) => player.selection === selection).map((player)=> player.name)
   }
 
   const didPlayerMakeSelection = (selection) =>{
@@ -82,7 +84,7 @@ const BetView = (props) => {
             onClick={()=>closeBet(props.gameId,props.bet.id,state.selection)}
           ><LockOpenIcon/></IconButton>
         )
-      case 'CLOSED':
+      default:
         return (
           <div/>
         );
@@ -97,22 +99,31 @@ const BetView = (props) => {
             <Button 
             variant="contained"
             disabled={!isUserRegistered()}
-            color={state.selection==selection?"primary":"default"}
+            color={state.selection===selection?"primary":"default"}
             fullWidth={true}
             onClick={()=> { 
               setLoading(true);
               setSuccess(false);
+              
+              let newSelection = state.selection===selection? clearedSelection : selection;
+
               setState({
                 ...state,
-                selection: selection,
+                selection: newSelection,
               });
 
-              selectBet(props.gameId, props.bet.id, selection)
+              selectBet(props.gameId, props.bet.id, newSelection)
                 .then(()=>
                 {
-                  enqueueSnackbar(selection +' selected',{ 
-                    variant: 'success',
-                  });
+                  if (newSelection === clearedSelection) {
+                    enqueueSnackbar( selection +' has been cleared',{ 
+                      variant: 'success',
+                    });
+                  } else {
+                    enqueueSnackbar(newSelection +' selected',{ 
+                      variant: 'success',
+                    });
+                  }
                   setTimeout(()=>{
                     setLoading(false);
                     setSuccess(true);
@@ -161,13 +172,16 @@ const BetView = (props) => {
         return (
           <Button 
             variant="contained"
-            color={state.selection==selection?"primary":"default"}
+            color={state.selection===selection?"primary":"default"}
             disabled={!state.isCaptain}
             fullWidth={true}
-            onClick={()=>setState({
-              ...state,
-              selection: selection, 
-            })}>
+            onClick={()=> {
+              let newSelection = state.selection === selection? clearedSelection : selection;
+              setState({
+                ...state,
+                selection: newSelection, 
+              })
+            }}>
             <Grid container
               justify='center'
               alignItems='center'>
@@ -227,12 +241,14 @@ const BetView = (props) => {
           </Grid>
           </Button>
         );
+        default:
+          return (
+            <div>
+              <Typography variant="subtitle1">{selection}</Typography>
+            </div>
+          );
     }
-    return (
-      <div>
-        <Typography variant="subtitle1">{selection}</Typography>
-      </div>
-    );
+
   };
   return (
     <div className={styles.betView} data-testid="betView">

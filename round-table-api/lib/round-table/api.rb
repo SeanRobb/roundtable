@@ -135,7 +135,7 @@ module RoundTable
       bet = get_bet betId
 
       raise "Bet must exist to have a selection to be placed" if bet.nil?
-      raise "Selection must be a choice to place a bet" unless bet.choiceA == selection or bet.choiceB == selection
+      raise "Selection must be a choice to place a bet" unless bet.choiceA == selection or bet.choiceB == selection or selection.empty?
       raise "Bet must be open to be placed" unless bet.opened?
 
       player = get_player playerName
@@ -143,7 +143,7 @@ module RoundTable
 
       # ensure to see if bet is already placed
       player.betsPlaced = player.betsPlaced.delete_if {|selectedBet| selectedBet[:id].eql? betId}
-      player.betsPlaced.push({id:betId,selection:selection})
+      player.betsPlaced.push({id:betId,selection:selection}) unless selection.empty?
     end
     def getRole(playerName)
       player = @roster.find {|player| player.name == playerName}

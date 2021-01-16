@@ -976,6 +976,21 @@ RSpec.describe RoundTable do
 
         expect(nextRoundGameroom.get_player(player1.name).betsPlaced).to include({id:bet.id,selection:bet.choiceA})
       end
+      it "can allow for players to enter a clear selection on open bets" do
+        nextRoundGameroom = createNextRoundValidGame 
+        openBetsFromOptions(nextRoundGameroom, 2)
+        
+        player1 = nextRoundGameroom.roster[2]
+        player2 = nextRoundGameroom.roster[4]
+
+        bet = nextRoundGameroom.openBets[1]
+
+        nextRoundGameroom.place_bet(player1.name,bet.id,bet.choiceA)
+        nextRoundGameroom.place_bet(player1.name,bet.id,"")
+
+        expect(nextRoundGameroom.get_player(player1.name).betsPlaced).to_not include({id:bet.id,selection:""})
+        expect(nextRoundGameroom.get_player(player1.name).betsPlaced).to_not include({id:bet.id,selection:bet.choiceA})
+      end
       it "can allow for players to enter selection on open bets only the latest selection will be saved" do
         nextRoundGameroom = createNextRoundValidGame 
         openBetsFromOptions(nextRoundGameroom, 2)
