@@ -58,7 +58,7 @@ GEM
     erubi (1.9.0)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
-    jmespath (1.4.0)
+    jmespath (1.6.1)
     jwt (2.2.1)
     loofah (2.7.0)
       crass (~> 1.0.2)
